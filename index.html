@@ -153,11 +153,11 @@
     <!-- 1. HOMEPAGE TAB -->
     <section id="tab-home" class="space-y-8">
       
-      <!-- Featured Banner -->
+      <!-- Featured Banner (Most Viewed Novel) -->
       <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-ink-950 via-purple-950 to-[#0b0f19] border border-ink-700/30 p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
         <div class="space-y-4 max-w-xl text-center md:text-left z-10">
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-ink-500/20 text-ink-400 border border-ink-500/30">
-            <i class="fa-solid fa-bolt text-amber-400"></i> Featured Masterpiece
+            <i class="fa-solid fa-fire text-amber-400"></i> Most Viewed Masterpiece
           </span>
           <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight" id="heroTitle">
             Chronicles of the Starforged
@@ -821,7 +821,7 @@
         console.error("Error seeding initial Firestore data:", err);
       }
 
-      // Real-time listener for Novels Collection from Firestore (Smooth Sync)
+      // Real-time listener for Novels Collection from Firestore (Public Read Enabled)
       onSnapshot(collection(db, "novels"), (snapshot) => {
         const temp = [];
         snapshot.forEach((docSnap) => {
@@ -1014,23 +1014,29 @@
 
     function updateHeroBanner() {
       if (window.novelsData.length > 0) {
-        const top = window.novelsData[0];
+        // Find the novel with the highest views for the top banner
+        const mostViewed = [...window.novelsData].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+
         const titleEl = document.getElementById('heroTitle');
         const descEl = document.getElementById('heroDesc');
         const authorEl = document.getElementById('heroAuthor');
         const viewsEl = document.getElementById('heroViews');
         const coverEl = document.getElementById('heroCover');
 
-        if (titleEl) titleEl.innerText = top.title;
-        if (descEl) descEl.innerText = top.description;
-        if (authorEl) authorEl.innerText = top.author;
-        if (viewsEl) viewsEl.innerText = formatNumber(top.views);
-        if (coverEl) coverEl.src = top.coverUrl;
+        if (titleEl) titleEl.innerText = mostViewed.title;
+        if (descEl) descEl.innerText = mostViewed.description;
+        if (authorEl) authorEl.innerText = mostViewed.author;
+        if (viewsEl) viewsEl.innerText = formatNumber(mostViewed.views);
+        if (coverEl) coverEl.src = mostViewed.coverUrl;
+        
+        // Save ID for banner button click
+        window.heroBookId = mostViewed.id;
       }
     }
 
     window.readBookFromHero = function() {
-      if (window.novelsData.length > 0) openBookDetail(window.novelsData[0].id);
+      if (window.heroBookId) openBookDetail(window.heroBookId);
+      else if (window.novelsData.length > 0) openBookDetail(window.novelsData[0].id);
     };
 
     // Book Detail Page
@@ -1577,7 +1583,7 @@
       }
     };
 
-    // Firebase Auth Handlers (Preserves Custom Profiles)
+    // Firebase Auth Handlers
     window.openAuthModal = function() {
       const modal = document.getElementById('authModal');
       if (modal) modal.classList.remove('hidden');
