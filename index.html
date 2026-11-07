@@ -683,6 +683,7 @@
       getFirestore, 
       collection, 
       doc, 
+      getDoc,
       getDocs, 
       setDoc, 
       updateDoc, 
@@ -834,18 +835,19 @@
         }
       });
 
-      // Firebase Auth state listener
+      // Firebase Auth state listener (Optimized)
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          // Fetch user profile document from Firestore
-          const userDocRef = doc(db, "users", user.uid);
-          const userSnap = await getDocs(query(collection(db, "users"))); // or direct get
-          // Let's fetch specifically
-          const docSnap = await getDocs(collection(db, "users"));
           let profileData = null;
-          docSnap.forEach(d => {
-            if (d.id === user.uid) profileData = d.data();
-          });
+          try {
+            const userDocRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userDocRef);
+            if (userSnap.exists()) {
+              profileData = userSnap.data();
+            }
+          } catch (err) {
+            console.error("Error fetching user profile document:", err);
+          }
 
           window.currentUser = {
             uid: user.uid,
