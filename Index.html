@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inkfinity - Read & Publish Web Novels</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ink: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+              950: '#0b0f19'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-serif-reading { font-family: 'Merriweather', serif; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Sepia Theme Override */
+    .theme-sepia {
+      background-color: #f4ecd8 !important;
+      color: #4a3b2a !important;
+    }
+    .theme-sepia .reader-card {
+      background-color: #ebdcb9 !important;
+      color: #3d2f20 !important;
+      border-color: #d8c49d !important;
+    }
+    .theme-sepia .reader-card * {
+      color: #3d2f20 !important;
+    }
+
+    /* Light Theme Override */
+    .theme-light {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    .theme-light .reader-card {
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+      border-color: #e2e8f0 !important;
+    }
+    .theme-light .reader-card * {
+      color: #1e293b !important;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+
+  <!-- ================= TOP HEADER / NAVBAR ================= -->
+  <header class="sticky top-0 z-40 bg-[#0b0f19]/90 backdrop-blur-md border-b border-ink-900/50 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-6">
+        <button onclick="showTab('home')" class="flex items-center gap-2.5 group text-left">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-ink-600 via-purple-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-ink-600/30 group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-feather-pointed text-xl"></i>
+          </div>
+          <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-purple-400 via-ink-500 to-indigo-400 bg-clip-text text-transparent">
+            Inkfinity
+          </span>
+        </button>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1 text-sm font-semibold">
+          <button onclick="showTab('home')" id="nav-home" class="px-3.5 py-2 rounded-xl text-ink-500 bg-ink-500/10">Browse</button>
+          <button onclick="showTab('library')" id="nav-library" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition">Bookmarks</button>
+          <button onclick="showTab('publish')" id="nav-publish" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition">Writer Studio</button>
+        </nav>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-md hidden sm:block">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search story title, genre, or author..." 
+            class="w-full pl-9 pr-4 py-2 rounded-full bg-ink-950/80 text-sm border border-ink-800/60 focus:outline-none focus:border-ink-500 text-gray-200 placeholder-gray-500 transition">
+        </div>
+      </div>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-3">
+        <div id="authArea">
+          <button onclick="openAuthModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 rounded-full shadow-lg shadow-ink-600/30 transition">
+            Sign In
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Search Sub-header -->
+    <div class="sm:hidden px-4 pb-3">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+        <input type="text" oninput="handleSearch(this.value)" placeholder="Search books or authors..." 
+          class="w-full pl-9 pr-4 py-2 rounded-full bg-ink-950/80 text-sm border border-ink-800 focus:outline-none focus:border-ink-500 text-gray-200 placeholder-gray-500">
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Nav -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0b0f19]/95 backdrop-blur-md border-t border-ink-900/60 px-6 py-2 flex items-center justify-between text-xs font-semibold">
+    <button onclick="showTab('home')" class="flex flex-col items-center gap-1 text-ink-500">
+      <i class="fa-solid fa-compass text-base"></i>
+      <span>Explore</span>
+    </button>
+    <button onclick="showTab('library')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+      <i class="fa-solid fa-bookmark text-base"></i>
+      <span>Library</span>
+    </button>
+    <button onclick="showTab('publish')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+      <i class="fa-solid fa-pen-nib text-base"></i>
+      <span>Studio</span>
+    </button>
+    <button onclick="openCurrentProfile()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+      <i class="fa-solid fa-user text-base"></i>
+      <span>Profile</span>
+    </button>
+  </div>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-16 md:mb-0">
+
+    <!-- 1. HOMEPAGE TAB -->
+    <section id="tab-home" class="space-y-8">
+      
+      <!-- Featured Banner -->
+      <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-ink-950 via-purple-950 to-[#0b0f19] border border-ink-700/30 p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+        <div class="space-y-4 max-w-xl text-center md:text-left z-10">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-ink-500/20 text-ink-400 border border-ink-500/30">
+            <i class="fa-solid fa-bolt text-amber-400"></i> Featured Masterpiece
+          </span>
+          <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight" id="heroTitle">
+            Chronicles of the Starforged
+          </h1>
+          <p class="text-gray-300 text-sm sm:text-base line-clamp-3 leading-relaxed" id="heroDesc">
+            In a galaxy governed by ancient ink-magic and star-smiths, a renegade scribe discovers a spell that can rewrite destiny itself.
+          </p>
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+            <button onclick="readBookFromHero()" class="px-6 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-white font-bold text-sm shadow-lg shadow-ink-600/30 transition flex items-center gap-2">
+              <i class="fa-solid fa-book-open"></i> Start Reading
+            </button>
+            <span class="text-xs text-gray-400 flex items-center gap-4">
+              <span><i class="fa-solid fa-eye me-1 text-ink-400"></i><span id="heroViews">28.4K</span> Reads</span>
+              <span><i class="fa-solid fa-pen-nib me-1 text-purple-400"></i><span id="heroAuthor">Astrid Cole</span></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Cover Artwork -->
+        <div class="w-40 sm:w-48 h-60 sm:h-68 rounded-2xl shadow-2xl overflow-hidden transform md:-rotate-2 hover:rotate-0 transition duration-300 border-2 border-white/10 shrink-0">
+          <img id="heroCover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Novel Cover" class="w-full h-full object-cover">
+        </div>
+      </div>
+
+      <!-- Genre Bar -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-gray-200 flex items-center gap-2">
+            <i class="fa-solid fa-shapes text-ink-500"></i> Browse Genres
+          </h2>
+          <span class="text-xs text-gray-500" id="genreCountLabel">All Stories</span>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2" id="genreFilterBar">
+          <!-- Dynamic Chips -->
+        </div>
+      </div>
+
+      <!-- Main Grid Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-amber-500"></i> Trending & New Releases
+          </h2>
+          <select id="sortBy" onchange="renderHomeNovels()" class="bg-ink-950 border border-ink-800 text-xs rounded-xl px-3 py-1.5 text-gray-300 focus:outline-none focus:border-ink-500">
+            <option value="updated">Recently Updated</option>
+            <option value="views">Most Reads</option>
+            <option value="title">Alphabetical</option>
+          </select>
+        </div>
+
+        <!-- Cards Grid -->
+        <div id="novelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          <!-- Story Cards injected here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="noNovelsMsg" class="hidden text-center py-16 bg-ink-950/40 rounded-3xl border border-ink-900">
+          <i class="fa-solid fa-book-bookmark text-4xl text-gray-600 mb-3"></i>
+          <p class="text-gray-400 font-medium">No stories found matching your criteria.</p>
+          <button onclick="resetFilters()" class="mt-3 text-xs text-ink-400 hover:underline">Clear Search & Filters</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BOOK DETAILS VIEW -->
+    <section id="tab-book-detail" class="hidden space-y-8">
+      <button onclick="showTab('home')" class="text-xs font-semibold text-gray-400 hover:text-white flex items-center gap-2 transition">
+        <i class="fa-solid fa-arrow-left"></i> Back to Explore
+      </button>
+
+      <div class="bg-ink-950/70 rounded-3xl border border-ink-900 p-6 sm:p-8 flex flex-col md:flex-row gap-8 shadow-xl">
+        <!-- Cover -->
+        <div class="w-48 sm:w-56 h-72 sm:h-80 rounded-2xl overflow-hidden border border-ink-800 shadow-2xl shrink-0 mx-auto md:mx-0">
+          <img id="detailCover" src="" class="w-full h-full object-cover">
+        </div>
+
+        <!-- Info Column -->
+        <div class="flex-1 space-y-4 text-center md:text-left">
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+            <span id="detailGenre" class="px-3 py-1 rounded-full text-xs font-semibold bg-ink-500/20 text-ink-400 border border-ink-500/30">
+              Genre
+            </span>
+            <span id="detailLanguage" class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+              English
+            </span>
+          </div>
+
+          <h1 id="detailTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"></h1>
+
+          <!-- Clickable Author Name -->
+          <p class="text-sm text-gray-400">
+            Written by 
+            <button id="detailAuthorBtn" onclick="openAuthorProfileFromDetail()" class="text-purple-400 hover:underline font-bold ml-1">
+              Author Name
+            </button>
+          </p>
+
+          <!-- Stats Counters -->
+          <div class="flex items-center justify-center md:justify-start gap-6 py-2 text-xs text-gray-400 border-y border-ink-900/80">
+            <div><i class="fa-solid fa-eye me-1.5 text-ink-400"></i><span id="detailViews" class="font-bold text-gray-200">0</span> Reads</div>
+            <div><i class="fa-solid fa-list-ul me-1.5 text-indigo-400"></i><span id="detailChaptersCount" class="font-bold text-gray-200">0</span> Chapters</div>
+            <div><i class="fa-solid fa-comments me-1.5 text-emerald-400"></i><span id="detailCommentsCount" class="font-bold text-gray-200">0</span> Comments</div>
+          </div>
+
+          <p id="detailDesc" class="text-sm text-gray-300 leading-relaxed max-w-2xl"></p>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-4">
+            <button onclick="startReadingCurrentBook()" class="px-6 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-white font-bold text-sm shadow-md shadow-ink-600/30 transition flex items-center gap-2">
+              <i class="fa-solid fa-play"></i> Start Reading
+            </button>
+
+            <button id="bookmarkBtn" onclick="toggleBookmarkCurrentBook()" class="px-5 py-3 rounded-full bg-ink-900/80 hover:bg-ink-800 text-gray-200 font-semibold text-sm border border-ink-800 transition flex items-center gap-2">
+              <i class="fa-regular fa-bookmark"></i> Bookmark
+            </button>
+
+            <button onclick="shareBook()" class="px-4 py-3 rounded-full bg-ink-900/80 hover:bg-ink-800 text-gray-200 font-semibold text-sm border border-ink-800 transition">
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter Index -->
+      <div class="bg-ink-950/40 rounded-3xl border border-ink-900 p-6 space-y-4">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-bars-staggered text-ink-500"></i> Chapters Directory
+        </h3>
+        <div id="detailChapterList" class="divide-y divide-ink-900/80">
+          <!-- Dynamic chapter list -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CHAPTER READER VIEW -->
+    <section id="tab-reader" class="hidden space-y-6 max-w-4xl mx-auto">
+      <!-- Toolbar Header -->
+      <div class="sticky top-20 z-30 bg-[#0b0f19]/90 backdrop-blur-md p-3 rounded-2xl border border-ink-900 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+        <button onclick="showTab('book-detail')" class="text-xs text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ink-950 border border-ink-800">
+          <i class="fa-solid fa-arrow-left"></i> Book Details
+        </button>
+
+        <!-- Customizer Toolbar -->
+        <div class="flex items-center gap-2 overflow-x-auto">
+          <!-- Theme Switcher -->
+          <div class="flex bg-ink-950 rounded-xl p-1 text-xs border border-ink-900">
+            <button onclick="setReaderTheme('dark')" class="px-2.5 py-1 rounded-lg text-gray-300 hover:text-white">Dark</button>
+            <button onclick="setReaderTheme('sepia')" class="px-2.5 py-1 rounded-lg text-amber-900 bg-amber-100 hover:bg-amber-200 font-bold">Sepia</button>
+            <button onclick="setReaderTheme('light')" class="px-2.5 py-1 rounded-lg text-gray-900 bg-white hover:bg-gray-100 font-bold">Light</button>
+          </div>
+
+          <!-- Font Size Selector -->
+          <div class="flex bg-ink-950 rounded-xl p-1 text-xs border border-ink-900">
+            <button onclick="setReaderFontSize('text-base')" class="px-2 py-1 text-gray-300">A-</button>
+            <button onclick="setReaderFontSize('text-lg')" class="px-2 py-1 text-gray-300 font-bold">A</button>
+            <button onclick="setReaderFontSize('text-xl')" class="px-2 py-1 text-gray-300 font-bold text-sm">A+</button>
+          </div>
+
+          <!-- Alignment Toggle LTR / RTL -->
+          <button onclick="toggleReaderDirection()" id="dirToggleBtn" class="px-3 py-1.5 rounded-xl bg-ink-950 border border-ink-900 text-xs text-gray-300 hover:text-white">
+            <i class="fa-solid fa-align-left me-1"></i> LTR
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Reader Card -->
+      <div id="readerContainer" class="reader-card bg-ink-950/70 rounded-3xl border border-ink-900 p-6 sm:p-12 space-y-6 shadow-2xl transition-all">
+        <div class="border-b border-ink-900/60 pb-4">
+          <span id="readerBookTitle" class="text-xs font-bold text-ink-400 tracking-wider uppercase">Book Title</span>
+          <h2 id="readerChapterTitle" class="text-2xl sm:text-3xl font-black text-white mt-1">Chapter Title</h2>
+        </div>
+
+        <!-- Chapter Text Content -->
+        <div id="readerBody" class="font-serif-reading text-gray-200 leading-relaxed space-y-6 min-h-[300px] text-lg whitespace-pre-line">
+          <!-- Text rendered here -->
+        </div>
+
+        <!-- Chapter Bottom Navigation -->
+        <div class="pt-8 border-t border-ink-900/60 flex items-center justify-between gap-4">
+          <button id="prevChapterBtn" onclick="navigateChapter(-1)" class="px-5 py-2.5 rounded-full bg-ink-900 hover:bg-ink-800 text-sm font-semibold text-white transition flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-arrow-left"></i> Previous Chapter
+          </button>
+          <button id="nextChapterBtn" onclick="navigateChapter(1)" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-semibold text-white transition flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+            Next Chapter <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Comment Section -->
+      <div class="bg-ink-950/40 rounded-3xl border border-ink-900 p-6 sm:p-8 space-y-6">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-comments text-ink-500"></i> Reader Community Comments (<span id="readerCommentCount">0</span>)
+        </h3>
+
+        <!-- Input -->
+        <div class="flex gap-3">
+          <div class="w-10 h-10 rounded-full bg-ink-600/30 flex items-center justify-center font-bold text-ink-400 shrink-0">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <textarea id="commentInput" rows="3" placeholder="Leave a review or share your thoughts on this chapter..." 
+              class="w-full rounded-2xl bg-ink-950 border border-ink-800 p-3.5 text-sm text-gray-200 focus:outline-none focus:border-ink-500 resize-none"></textarea>
+            <div class="flex justify-end">
+              <button onclick="postComment()" class="px-5 py-2 rounded-full bg-ink-600 hover:bg-ink-500 text-white font-bold text-xs shadow-md transition">
+                Post Comment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feed -->
+        <div id="commentsFeed" class="space-y-4 pt-4 border-t border-ink-900">
+          <!-- Dynamic Comments -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. AUTHOR PROFILE VIEW -->
+    <section id="tab-author" class="hidden space-y-8">
+      <!-- Profile Header -->
+      <div class="bg-gradient-to-r from-ink-950 to-purple-950/40 rounded-3xl border border-ink-900 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-xl relative">
+        <img id="authorAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" 
+          class="w-28 h-28 rounded-full border-4 border-ink-500 object-cover shadow-lg">
+
+        <div class="space-y-3 text-center sm:text-left flex-1">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+            <h1 id="authorName" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Author Name</h1>
+            <button id="editProfileBtn" onclick="toggleEditProfileModal()" class="hidden px-3 py-1 rounded-full bg-ink-900 border border-ink-700 text-xs text-gray-300 hover:text-white transition">
+              <i class="fa-solid fa-pen text-[10px] me-1"></i> Edit Profile
+            </button>
+          </div>
+          <p id="authorBio" class="text-sm text-gray-300 max-w-xl leading-relaxed">Passionate author publishing captivating stories on Inkfinity.</p>
+          
+          <!-- Socials -->
+          <div id="authorSocials" class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1">
+            <!-- Dynamic Social Badges -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Published Novels Grid -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-book-open text-ink-500"></i> Works by this Author
+        </h2>
+        <div id="authorNovelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          <!-- Cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. WRITER STUDIO (PUBLISH / DRAFT) -->
+    <section id="tab-publish" class="hidden space-y-8 max-w-3xl mx-auto">
+      <div class="border-b border-ink-900 pb-4">
+        <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+          <i class="fa-solid fa-feather-pointed text-ink-500"></i> Writer Studio
+        </h1>
+        <p class="text-xs text-gray-400 mt-1">Publish new web novels, add chapters, or save drafts for later editing.</p>
+      </div>
+
+      <form id="publishForm" onsubmit="handlePublishStory(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
+        
+        <div class="space-y-4">
+          <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Story Settings</h3>
+          
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Novel Title *</label>
+            <input type="text" id="pubTitle" required placeholder="e.g. Whispers of the Void" 
+              class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
+              <select id="pubGenre" required class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+                <option value="Romance">Romance</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Horror">Horror</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Sci-Fi">Sci-Fi</option>
+                <option value="Drama">Drama</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Language *</label>
+              <select id="pubLanguage" required class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+                <option value="English">English</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="Arabic">Arabic (RTL)</option>
+                <option value="Urdu">Urdu (RTL)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Upload Book Cover from Gallery</label>
+            <div class="flex items-center gap-4">
+              <label class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink-950 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
+                <i class="fa-solid fa-image text-ink-400 text-base"></i>
+                <span id="pubCoverFileName">Choose image from device...</span>
+                <input type="file" id="pubCoverFile" accept="image/*" onchange="handleCoverFileSelect(event)" class="hidden">
+              </label>
+              <div id="pubCoverPreviewContainer" class="w-12 h-16 rounded-lg bg-ink-900 border border-ink-800 overflow-hidden shrink-0 hidden">
+                <img id="pubCoverPreview" src="" class="w-full h-full object-cover">
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1">Select PNG, JPG, or WEBP. If left empty, default cover artwork will be assigned automatically.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Short Book Synopsis *</label>
+            <textarea id="pubDesc" rows="3" required placeholder="Summarize your story plot to intrigue readers..." 
+              class="w-full rounded-xl bg-ink-950 border border-ink-800 p-3.5 text-sm text-white focus:outline-none focus:border-ink-500"></textarea>
+          </div>
+        </div>
+
+        <hr class="border-ink-900">
+
+        <!-- Initial Chapter Section -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Chapter 1 Content</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter #</label>
+              <input type="number" id="pubChapNum" value="1" min="1" 
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Title *</label>
+              <input type="text" id="pubChapTitle" required placeholder="e.g. Chapter 1: The Awakening" 
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Body *</label>
+            <textarea id="pubChapContent" rows="8" required placeholder="Write or paste your story text here..." 
+              class="w-full rounded-xl bg-ink-950 border border-ink-800 p-4 text-sm text-white focus:outline-none focus:border-ink-500 leading-relaxed font-serif-reading"></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-4 pt-2">
+          <button type="button" onclick="saveAsDraft()" class="px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-sm font-semibold text-gray-200 transition">
+            Save as Draft
+          </button>
+          <button type="submit" class="px-8 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-bold text-white shadow-lg shadow-ink-600/30 transition">
+            Publish Story Now
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 6. BOOKMARKS LIBRARY -->
+    <section id="tab-library" class="hidden space-y-6">
+      <div class="border-b border-ink-900 pb-4">
+        <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+          <i class="fa-solid fa-bookmark text-ink-500"></i> My Saved Library
+        </h1>
+        <p class="text-xs text-gray-400 mt-1">Easily access bookmarked web novels to continue reading.</p>
+      </div>
+
+      <div id="libraryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+        <!-- Injected -->
+      </div>
+
+      <div id="emptyLibraryMsg" class="hidden text-center py-16 bg-ink-950/40 rounded-3xl border border-ink-900 space-y-3">
+        <i class="fa-regular fa-bookmark text-4xl text-gray-600"></i>
+        <p class="text-gray-400 font-medium">Your library is currently empty.</p>
+        <button onclick="showTab('home')" class="text-xs px-4 py-2 rounded-full bg-ink-600 text-white font-semibold hover:bg-ink-500 transition">
+          Discover Stories
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= AUTH MODAL ================= -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-ink-950 border border-ink-800 rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-6 relative shadow-2xl">
+      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <h2 class="text-2xl font-extrabold text-white">Join Inkfinity</h2>
+        <p class="text-xs text-gray-400">Sign in to read, publish novels, leave comments & bookmark stories.</p>
+      </div>
+
+      <!-- Google Login Button -->
+      <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-bold text-sm flex items-center justify-center gap-3 shadow-md transition">
+        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.4 7.37 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.27 2.6 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+        Sign in with Google
+      </button>
+
+      <div class="flex items-center gap-3 text-xs text-gray-500 uppercase font-semibold">
+        <div class="h-px bg-ink-900 flex-1"></div>
+        <span>Or with Email</span>
+        <div class="h-px bg-ink-900 flex-1"></div>
+      </div>
+
+      <form onsubmit="handleEmailAuth(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Author / Reader Display Name</label>
+          <input type="text" id="authName" placeholder="e.g. Nova Vance" required
+            class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Email Address</label>
+          <input type="email" id="authEmail" placeholder="writer@inkfinity.com" required
+            class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required
+            class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-white font-bold text-sm shadow-md transition">
+          Sign In / Create Account
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div id="profileEditModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-ink-950 border border-ink-800 rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-4 relative shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+      <button onclick="toggleEditProfileModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h2 class="text-xl font-bold text-white">Edit Author Profile</h2>
+
+      <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Display Name</label>
+          <input type="text" id="editName" required
+            class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Profile Picture (DP) from Gallery</label>
+          <div class="flex items-center gap-4">
+            <label class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ink-900/60 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
+              <i class="fa-solid fa-camera text-ink-400"></i>
+              <span id="editAvatarFileName">Choose Profile Picture...</span>
+              <input type="file" id="editAvatarFile" accept="image/*" onchange="handleAvatarFileSelect(event)" class="hidden">
+            </label>
+            <div class="w-10 h-10 rounded-full bg-ink-900 border border-ink-700 overflow-hidden shrink-0">
+              <img id="editAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Bio / Writer Description</label>
+          <textarea id="editBio" rows="3"
+            class="w-full rounded-xl bg-ink-900/60 border border-ink-800 p-3 text-sm text-white focus:outline-none focus:border-ink-500"></textarea>
+        </div>
+
+        <!-- Social Media Inputs -->
+        <div class="space-y-3 border-t border-ink-900 pt-3">
+          <label class="block text-xs font-extrabold text-ink-400 uppercase tracking-wider">Social Media & Links</label>
+          
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1"><i class="fa-brands fa-facebook text-indigo-400 me-1"></i> Facebook Link</label>
+            <input type="url" id="editSocialFacebook" placeholder="https://facebook.com/yourprofile"
+              class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-ink-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1"><i class="fa-brands fa-instagram text-pink-400 me-1"></i> Instagram Link</label>
+            <input type="url" id="editSocialInstagram" placeholder="https://instagram.com/yourprofile"
+              class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-ink-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1"><i class="fa-brands fa-x-twitter text-gray-300 me-1"></i> Twitter / X Link</label>
+            <input type="url" id="editSocialTwitter" placeholder="https://x.com/yourprofile"
+              class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-ink-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1"><i class="fa-solid fa-globe text-emerald-400 me-1"></i> Personal Website / Portfolio</label>
+            <input type="url" id="editSocialWebsite" placeholder="https://yourwebsite.com"
+              class="w-full rounded-xl bg-ink-900/60 border border-ink-800 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-ink-500">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-ink-600 hover:bg-ink-500 text-white font-bold text-sm transition">
+          Save Profile Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-ink-900 text-white border border-ink-700 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg" class="text-sm font-medium">Notification message</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT APPLICATION LOGIC ================= -->
+  <script>
+    // Default Web Novels Seed Data
+    const INITIAL_NOVELS = [
+      {
+        id: "ink_1",
+        title: "Chronicles of the Starforged",
+        author: "Astrid Cole",
+        authorId: "auth_astrid",
+        genre: "Sci-Fi",
+        language: "English",
+        coverUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+        description: "In a galaxy governed by ancient ink-magic and star-smiths, a renegade scribe discovers a spell that can rewrite destiny itself.",
+        views: 28400,
+        updatedAt: Date.now(),
+        authorBio: "Bestselling space opera & urban fantasy writer crafting cosmic tales.",
+        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+        authorSocial: "https://facebook.com/astridcole",
+        chapters: [
+          {
+            number: 1,
+            title: "Chapter 1: The Constellation Vault",
+            content: "The astral observatory hummed with quiet resonance. Astrid turned the brass dials, watching liquid starlight flow through the glass quills of the celestial manuscript.\n\n'If the Council catches you transcribing forbidden star maps,' whispered Kael from the doorway, 'they will bind your hands in obsidian glass.'\n\nAstrid didn't pause her quill. 'Then let them try. The stars are burning out, Kael. Someone has to rewrite the sky.'"
+          },
+          {
+            number: 2,
+            title: "Chapter 2: Starlight & Shadow",
+            content: "The rift opened in silence. Pure indigo ink bled across the observatory floor, glowing with ethereal heat. From the void stepped a figure wrapped in woven shadows."
+          }
+        ],
+        comments: [
+          { id: "c1", user: "CosmicReader", text: "The magic system with ink and stars is mind-blowing!", timestamp: "1 hour ago" }
+        ]
+      },
+      {
+        id: "ink_2",
+        title: "The Crimson Alchemist",
+        author: "Damian Vance",
+        authorId: "auth_damian",
+        genre: "Fantasy",
+        language: "English",
+        coverUrl: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=600&q=80",
+        description: "An exiled potion-maker uncovers a royal conspiracy brewing inside the forbidden alchemy tower of Eldoria.",
+        views: 19200,
+        updatedAt: Date.now() - 43200000,
+        authorBio: "Dark fantasy worldbuilder obsessed with potions, dragons, and ancient ruins.",
+        authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+        authorSocial: "https://twitter.com/damianvance",
+        chapters: [
+          {
+            number: 1,
+            title: "Chapter 1: Vials of Ash",
+            content: "The subterranean laboratory smelled of dried sage and ozone. Damian swirled the glowing red vial until the crystal sediment dissolved into liquid flame."
+          }
+        ],
+        comments: []
+      },
+      {
+        id: "ink_3",
+        title: "Velvet Whispers at Midnight",
+        author: "Sophia Laurent",
+        authorId: "auth_sophia",
+        genre: "Romance",
+        language: "English",
+        coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
+        description: "A chance encounter at a Parisian masquerade ball sets off an unforgettable summer romance between two rival art restorers.",
+        views: 31500,
+        updatedAt: Date.now() - 86400000,
+        authorBio: "Romance novelist writing modern fairytales across European cities.",
+        authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+        authorSocial: "https://instagram.com/sophialaurent",
+        chapters: [
+          {
+            number: 1,
+            title: "Chapter 1: The Venetian Mask",
+            content: "Chandeliers cast golden reflections across the marble ballroom. Underneath a filigree silver mask, Sophia watched her rival across the velvet room."
+          }
+        ],
+        comments: []
+      },
+      {
+        id: "ink_4",
+        title: "Echoes of the Haunting Bay",
+        author: "Victor Thorne",
+        authorId: "auth_victor",
+        genre: "Horror",
+        language: "English",
+        coverUrl: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80",
+        description: "An abandoned ocean lighthouse begins transmitting radio signals forty years after its entire crew mysteriously vanished.",
+        views: 11400,
+        updatedAt: Date.now() - 172800000,
+        authorBio: "Horror and mystery novelist crafting eerie nautical tales.",
+        authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+        authorSocial: "",
+        chapters: [
+          {
+            number: 1,
+            title: "Chapter 1: Static on Channel 9",
+            content: "The maritime receiver buzzed with crackling static. Then, clear as glass through the ocean gale, a foghorn sounded—from a lighthouse decommissioned in 1984."
+          }
+        ],
+        comments: []
+      }
+    ];
+
+    // Local Storage Data Wrappers
+    function getStoredNovels() {
+      const stored = localStorage.getItem('inkfinity_novels');
+      if (!stored) {
+        localStorage.setItem('inkfinity_novels', JSON.stringify(INITIAL_NOVELS));
+        return INITIAL_NOVELS;
+      }
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return INITIAL_NOVELS;
+      }
+    }
+
+    function saveStoredNovels(novels) {
+      localStorage.setItem('inkfinity_novels', JSON.stringify(novels));
+    }
+
+    function getBookmarks() {
+      try {
+        return JSON.parse(localStorage.getItem('inkfinity_bookmarks') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveBookmarks(bm) {
+      localStorage.setItem('inkfinity_bookmarks', JSON.stringify(bm));
+    }
+
+    // App State
+    let currentUser = null;
+    let novelsData = getStoredNovels();
+    let selectedGenre = "All";
+    let searchQuery = "";
+    let currentBookId = null;
+    let currentChapterIdx = 0;
+    let readerDirection = "ltr";
+
+    // App Lifecycle Initializer
+    window.onload = function() {
+      const localUser = localStorage.getItem('inkfinity_active_user');
+      if (localUser) {
+        try {
+          const parsed = JSON.parse(localUser);
+          currentUser = loadUserProfileFromStorage(parsed.uid) || parsed;
+        } catch (e) {
+          currentUser = null;
+        }
+      }
+
+      renderAuthUI();
+      renderGenreChips();
+      renderHomeNovels();
+      updateHeroBanner();
+    };
+
+    // User Profile Persistence Registry
+    function getUserProfilesMap() {
+      try {
+        return JSON.parse(localStorage.getItem('inkfinity_user_profiles') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveUserProfileToStorage(profile) {
+      if (!profile || !profile.uid) return;
+      const profiles = getUserProfilesMap();
+      profiles[profile.uid] = profile;
+      localStorage.setItem('inkfinity_user_profiles', JSON.stringify(profiles));
+      localStorage.setItem('inkfinity_active_user', JSON.stringify(profile));
+    }
+
+    function loadUserProfileFromStorage(uid) {
+      const profiles = getUserProfilesMap();
+      return profiles[uid] || null;
+    }
+
+    // Render Navbar Auth Area
+    window.renderAuthUI = function() {
+      const authArea = document.getElementById('authArea');
+      if (!authArea) return;
+
+      if (currentUser) {
+        authArea.innerHTML = `
+          <div class="flex items-center gap-3">
+            <button onclick="openAuthorProfile('${currentUser.uid}', '${currentUser.name.replace(/'/g, "\\'")}')" class="flex items-center gap-2 hover:opacity-80 transition">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-ink-600 to-purple-600 flex items-center justify-center font-extrabold text-white text-xs shadow-md border border-ink-500/50 overflow-hidden">
+                ${currentUser.avatar 
+                  ? `<img src="${currentUser.avatar}" class="w-full h-full object-cover">` 
+                  : currentUser.name.charAt(0).toUpperCase()}
+              </div>
+              <span class="text-xs font-bold text-gray-200 hidden lg:inline">${currentUser.name}</span>
+            </button>
+            <button onclick="handleSignOut()" class="p-2 text-gray-400 hover:text-rose-400 text-xs" title="Sign Out">
+              <i class="fa-solid fa-right-from-bracket text-sm"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        authArea.innerHTML = `
+          <button onclick="openAuthModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 rounded-full shadow-lg shadow-ink-600/30 transition">
+            Sign In
+          </button>
+        `;
+      }
+    };
+
+    // Router Tabs Navigation
+    window.showTab = function(tabName) {
+      const tabs = ['home', 'book-detail', 'reader', 'author', 'publish', 'library'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) el.classList.add('hidden');
+        const navEl = document.getElementById(`nav-${t}`);
+        if (navEl) navEl.className = "px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition";
+      });
+
+      const activeEl = document.getElementById(`tab-${tabName}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if (activeNav) activeNav.className = "px-3.5 py-2 rounded-xl text-ink-500 bg-ink-500/10 font-bold";
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (tabName === 'library') renderLibrary();
+    };
+
+    // Genre Bar Filtering
+    const GENRES = ["All", "Thriller", "Mystery", "Romance", "Horror", "Fantasy", "Sci-Fi", "Drama"];
+    window.renderGenreChips = function() {
+      const bar = document.getElementById('genreFilterBar');
+      if (!bar) return;
+
+      bar.innerHTML = GENRES.map(g => `
+        <button onclick="filterByGenre('${g}')" 
+          class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition border ${
+            selectedGenre === g 
+              ? 'bg-gradient-to-r from-ink-600 to-purple-600 text-white border-ink-500 shadow-lg shadow-ink-600/30' 
+              : 'bg-ink-950/80 text-gray-300 border-ink-800/80 hover:border-ink-600 hover:text-white'
+          }">
+          ${g}
+        </button>
+      `).join('');
+    };
+
+    window.filterByGenre = function(genre) {
+      selectedGenre = genre;
+      renderGenreChips();
+      renderHomeNovels();
+      const label = document.getElementById('genreCountLabel');
+      if (label) label.innerText = genre === 'All' ? 'All Stories' : `Category: ${genre}`;
+    };
+
+    window.handleSearch = function(val) {
+      searchQuery = val.toLowerCase().trim();
+      renderHomeNovels();
+    };
+
+    window.resetFilters = function() {
+      selectedGenre = "All";
+      searchQuery = "";
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = "";
+      renderGenreChips();
+      renderHomeNovels();
+    };
+
+    // Render Homepage Novels Grid
+    window.renderHomeNovels = function() {
+      const grid = document.getElementById('novelsGrid');
+      const noMsg = document.getElementById('noNovelsMsg');
+      const sortByEl = document.getElementById('sortBy');
+      const sortBy = sortByEl ? sortByEl.value : 'updated';
+
+      if (!grid) return;
+
+      let filtered = novelsData.filter(n => {
+        const matchesGenre = selectedGenre === "All" || n.genre === selectedGenre;
+        const matchesSearch = !searchQuery || 
+          n.title.toLowerCase().includes(searchQuery) || 
+          n.author.toLowerCase().includes(searchQuery) ||
+          n.genre.toLowerCase().includes(searchQuery);
+        return matchesGenre && matchesSearch;
+      });
+
+      if (sortBy === 'views') filtered.sort((a,b) => b.views - a.views);
+      else if (sortBy === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title));
+      else filtered.sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        if (noMsg) noMsg.classList.remove('hidden');
+        return;
+      }
+      if (noMsg) noMsg.classList.add('hidden');
+
+      grid.innerHTML = filtered.map(novel => `
+        <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition duration-300">
+          <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
+            <img src="${novel.coverUrl || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=600&q=80'}" 
+              alt="${novel.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-ink-950/90 backdrop-blur-md text-ink-400 border border-ink-800">
+              ${novel.genre}
+            </span>
+          </div>
+
+          <h3 class="text-sm font-bold text-gray-100 group-hover:text-ink-400 transition line-clamp-1 mt-1">
+            ${novel.title}
+          </h3>
+
+          <p class="text-xs text-gray-400 line-clamp-1">
+            <i class="fa-solid fa-pen-nib text-[10px] me-1 text-purple-400"></i>${novel.author}
+          </p>
+
+          <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-ink-900">
+            <span><i class="fa-solid fa-eye me-1 text-ink-400"></i>${formatNumber(novel.views)}</span>
+            <span><i class="fa-solid fa-comments me-1 text-emerald-400"></i>${novel.comments ? novel.comments.length : 0}</span>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    function updateHeroBanner() {
+      if (novelsData.length > 0) {
+        const top = novelsData[0];
+        const titleEl = document.getElementById('heroTitle');
+        const descEl = document.getElementById('heroDesc');
+        const authorEl = document.getElementById('heroAuthor');
+        const viewsEl = document.getElementById('heroViews');
+        const coverEl = document.getElementById('heroCover');
+
+        if (titleEl) titleEl.innerText = top.title;
+        if (descEl) descEl.innerText = top.description;
+        if (authorEl) authorEl.innerText = top.author;
+        if (viewsEl) viewsEl.innerText = formatNumber(top.views);
+        if (coverEl) coverEl.src = top.coverUrl;
+      }
+    }
+
+    window.readBookFromHero = function() {
+      if (novelsData.length > 0) openBookDetail(novelsData[0].id);
+    };
+
+    // Book Detail Page
+    window.openBookDetail = function(bookId) {
+      currentBookId = bookId;
+      const novel = novelsData.find(n => n.id === bookId);
+      if (!novel) return;
+
+      document.getElementById('detailCover').src = novel.coverUrl;
+      document.getElementById('detailGenre').innerText = novel.genre;
+      document.getElementById('detailLanguage').innerText = novel.language || 'English';
+      document.getElementById('detailTitle').innerText = novel.title;
+      document.getElementById('detailAuthorBtn').innerText = novel.author;
+      document.getElementById('detailViews').innerText = formatNumber(novel.views);
+      document.getElementById('detailChaptersCount').innerText = novel.chapters ? novel.chapters.length : 0;
+      document.getElementById('detailCommentsCount').innerText = novel.comments ? novel.comments.length : 0;
+      document.getElementById('detailDesc').innerText = novel.description;
+
+      const bms = getBookmarks();
+      const isBookmarked = bms.includes(bookId);
+      const bmBtn = document.getElementById('bookmarkBtn');
+      if (bmBtn) {
+        bmBtn.innerHTML = isBookmarked 
+          ? `<i class="fa-solid fa-bookmark text-amber-400"></i> Bookmarked` 
+          : `<i class="fa-regular fa-bookmark"></i> Bookmark`;
+      }
+
+      const chapList = document.getElementById('detailChapterList');
+      if (chapList && novel.chapters) {
+        chapList.innerHTML = novel.chapters.map((chap, idx) => `
+          <div onclick="openReader('${novel.id}', ${idx})" class="py-3.5 px-4 hover:bg-ink-900/60 rounded-xl cursor-pointer flex items-center justify-between transition group">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-ink-950 border border-ink-800 flex items-center justify-center text-xs font-bold text-ink-400 group-hover:bg-ink-600 group-hover:text-white transition">
+                ${chap.number || (idx + 1)}
+              </span>
+              <span class="text-sm font-semibold text-gray-200 group-hover:text-white transition">
+                ${chap.title}
+              </span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:text-ink-400 transition"></i>
+          </div>
+        `).join('');
+      }
+
+      showTab('book-detail');
+    };
+
+    // Reader Interface
+    window.openReader = function(bookId, chapIdx) {
+      currentBookId = bookId;
+      currentChapterIdx = chapIdx;
+
+      const novel = novelsData.find(n => n.id === bookId);
+      if (!novel || !novel.chapters || !novel.chapters[chapIdx]) return;
+
+      novel.views = (novel.views || 0) + 1;
+      saveStoredNovels(novelsData);
+
+      const chap = novel.chapters[chapIdx];
+
+      document.getElementById('readerBookTitle').innerText = novel.title;
+      document.getElementById('readerChapterTitle').innerText = chap.title;
+      document.getElementById('readerBody').innerText = chap.content;
+
+      const prevBtn = document.getElementById('prevChapterBtn');
+      const nextBtn = document.getElementById('nextChapterBtn');
+      if (prevBtn) prevBtn.disabled = (chapIdx === 0);
+      if (nextBtn) nextBtn.disabled = (chapIdx === novel.chapters.length - 1);
+
+      renderComments(novel);
+      showTab('reader');
+    };
+
+    window.startReadingCurrentBook = function() {
+      if (currentBookId) openReader(currentBookId, 0);
+    };
+
+    window.navigateChapter = function(dir) {
+      const newIdx = currentChapterIdx + dir;
+      if (currentBookId) openReader(currentBookId, newIdx);
+    };
+
+    // Reader Customizers
+    window.setReaderTheme = function(theme) {
+      const container = document.body;
+      container.classList.remove('theme-sepia', 'theme-light');
+      if (theme === 'sepia') container.classList.add('theme-sepia');
+      else if (theme === 'light') container.classList.add('theme-light');
+    };
+
+    window.setReaderFontSize = function(sizeClass) {
+      const body = document.getElementById('readerBody');
+      if (body) {
+        body.classList.remove('text-base', 'text-lg', 'text-xl');
+        body.classList.add(sizeClass);
+      }
+    };
+
+    window.toggleReaderDirection = function() {
+      const container = document.getElementById('readerContainer');
+      const btn = document.getElementById('dirToggleBtn');
+      if (readerDirection === 'ltr') {
+        readerDirection = 'rtl';
+        if (container) container.setAttribute('dir', 'rtl');
+        if (btn) btn.innerHTML = `<i class="fa-solid fa-align-right me-1"></i> RTL`;
+      } else {
+        readerDirection = 'ltr';
+        if (container) container.setAttribute('dir', 'ltr');
+        if (btn) btn.innerHTML = `<i class="fa-solid fa-align-left me-1"></i> LTR`;
+      }
+    };
+
+    // Comments
+    function renderComments(novel) {
+      const countEl = document.getElementById('readerCommentCount');
+      const feed = document.getElementById('commentsFeed');
+      const comments = novel.comments || [];
+
+      if (countEl) countEl.innerText = comments.length;
+
+      if (!feed) return;
+
+      if (comments.length === 0) {
+        feed.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No comments yet. Share your thoughts!</p>`;
+        return;
+      }
+
+      feed.innerHTML = comments.map(c => `
+        <div class="bg-ink-950/60 p-4 rounded-2xl border border-ink-900 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-user"></i> ${c.user}
+            </span>
+            <span class="text-[10px] text-gray-500">${c.timestamp || 'Recently'}</span>
+          </div>
+          <p class="text-xs text-gray-200 leading-relaxed">${c.text}</p>
+        </div>
+      `).join('');
+    }
+
+    window.postComment = function() {
+      const input = document.getElementById('commentInput');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const novel = novelsData.find(n => n.id === currentBookId);
+      if (!novel) return;
+
+      if (!novel.comments) novel.comments = [];
+      novel.comments.unshift({
+        id: 'c_' + Date.now(),
+        user: currentUser.name,
+        text: text,
+        timestamp: 'Just now'
+      });
+
+      saveStoredNovels(novelsData);
+      input.value = '';
+      renderComments(novel);
+      showToast('Comment posted!');
+    };
+
+    // Bookmarking
+    window.toggleBookmarkCurrentBook = function() {
+      if (!currentBookId) return;
+      let bms = getBookmarks();
+      if (bms.includes(currentBookId)) {
+        bms = bms.filter(id => id !== currentBookId);
+        showToast('Removed from Library');
+      } else {
+        bms.push(currentBookId);
+        showToast('Saved to Library!');
+      }
+      saveBookmarks(bms);
+      
+      const bmBtn = document.getElementById('bookmarkBtn');
+      const isBookmarked = bms.includes(currentBookId);
+      if (bmBtn) {
+        bmBtn.innerHTML = isBookmarked 
+          ? `<i class="fa-solid fa-bookmark text-amber-400"></i> Bookmarked` 
+          : `<i class="fa-regular fa-bookmark"></i> Bookmark`;
+      }
+    };
+
+    window.renderLibrary = function() {
+      const grid = document.getElementById('libraryGrid');
+      const emptyMsg = document.getElementById('emptyLibraryMsg');
+      const bms = getBookmarks();
+
+      if (!grid) return;
+
+      const savedNovels = novelsData.filter(n => bms.includes(n.id));
+
+      if (savedNovels.length === 0) {
+        grid.innerHTML = '';
+        if (emptyMsg) emptyMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyMsg) emptyMsg.classList.add('hidden');
+      grid.innerHTML = savedNovels.map(novel => `
+        <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition">
+          <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
+            <img src="${novel.coverUrl}" alt="${novel.title}" class="w-full h-full object-cover">
+          </div>
+          <h3 class="text-sm font-bold text-gray-100 line-clamp-1 mt-1">${novel.title}</h3>
+          <p class="text-xs text-gray-400">${novel.author}</p>
+        </div>
+      `).join('');
+    };
+
+    // Author Profile Views
+    window.openAuthorProfileFromDetail = function() {
+      const novel = novelsData.find(n => n.id === currentBookId);
+      if (novel) openAuthorProfile(novel.authorId, novel.author);
+    };
+
+    window.openCurrentProfile = function() {
+      if (currentUser) {
+        openAuthorProfile(currentUser.uid, currentUser.name);
+      } else {
+        openAuthModal();
+      }
+    };
+
+    window.openAuthorProfile = function(authorId, authorName) {
+      const sample = novelsData.find(n => n.author === authorName || n.authorId === authorId);
+      
+      const isSelf = currentUser && (currentUser.uid === authorId || currentUser.name === authorName);
+      const profile = isSelf ? currentUser : loadUserProfileFromStorage(authorId);
+
+      const displayName = profile?.name || authorName;
+      const displayBio = profile?.bio || sample?.authorBio || 'Web novel author publishing on Inkfinity.';
+      const displayAvatar = profile?.avatar || sample?.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
+      
+      const nameEl = document.getElementById('authorName');
+      const bioEl = document.getElementById('authorBio');
+      const avatarEl = document.getElementById('authorAvatar');
+      
+      if (nameEl) nameEl.innerText = displayName;
+      if (bioEl) bioEl.innerText = displayBio;
+      if (avatarEl) avatarEl.src = displayAvatar;
+
+      // Show Edit Profile button if visiting own profile
+      const editBtn = document.getElementById('editProfileBtn');
+      if (editBtn) {
+        if (isSelf) editBtn.classList.remove('hidden');
+        else editBtn.classList.add('hidden');
+      }
+
+      // Render Multi-Social Links
+      const socialsEl = document.getElementById('authorSocials');
+      if (socialsEl) {
+        const socials = profile?.socials || {
+          facebook: sample?.authorSocial || '',
+          instagram: '',
+          twitter: '',
+          website: ''
+        };
+
+        let socialBadgesHTML = '';
+        if (socials.facebook) {
+          socialBadgesHTML += `
+            <a href="${socials.facebook}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-semibold hover:bg-blue-600 hover:text-white transition flex items-center gap-1.5">
+              <i class="fa-brands fa-facebook"></i> Facebook
+            </a>`;
+        }
+        if (socials.instagram) {
+          socialBadgesHTML += `
+            <a href="${socials.instagram}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-pink-600/20 text-pink-400 border border-pink-500/30 text-xs font-semibold hover:bg-pink-600 hover:text-white transition flex items-center gap-1.5">
+              <i class="fa-brands fa-instagram"></i> Instagram
+            </a>`;
+        }
+        if (socials.twitter) {
+          socialBadgesHTML += `
+            <a href="${socials.twitter}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-gray-700/30 text-gray-300 border border-gray-600/30 text-xs font-semibold hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5">
+              <i class="fa-brands fa-x-twitter"></i> Twitter / X
+            </a>`;
+        }
+        if (socials.website) {
+          socialBadgesHTML += `
+            <a href="${socials.website}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-600 hover:text-white transition flex items-center gap-1.5">
+              <i class="fa-solid fa-globe"></i> Website
+            </a>`;
+        }
+
+        socialsEl.innerHTML = socialBadgesHTML || `<span class="text-xs text-gray-500 italic">No social links provided.</span>`;
+      }
+
+      const authorNovels = novelsData.filter(n => n.author === authorName || n.authorId === authorId);
+      const grid = document.getElementById('authorNovelsGrid');
+      
+      if (grid) {
+        grid.innerHTML = authorNovels.map(novel => `
+          <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition">
+            <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
+              <img src="${novel.coverUrl}" alt="${novel.title}" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-sm font-bold text-gray-100 line-clamp-1 mt-1">${novel.title}</h3>
+          </div>
+        `).join('');
+      }
+
+      showTab('author');
+    };
+
+    // Avatar File Picker
+    let currentUploadedAvatarBase64 = "";
+
+    window.handleAvatarFileSelect = function(event) {
+      const file = event.target.files[0];
+      const fileNameEl = document.getElementById('editAvatarFileName');
+      const previewImg = document.getElementById('editAvatarPreview');
+
+      if (file) {
+        if (fileNameEl) fileNameEl.innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentUploadedAvatarBase64 = e.target.result;
+          if (previewImg) previewImg.src = currentUploadedAvatarBase64;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Edit Profile Modal logic
+    window.toggleEditProfileModal = function() {
+      const modal = document.getElementById('profileEditModal');
+      if (!modal) return;
+      if (modal.classList.contains('hidden')) {
+        document.getElementById('editName').value = currentUser?.name || '';
+        document.getElementById('editBio').value = currentUser?.bio || '';
+        
+        const previewImg = document.getElementById('editAvatarPreview');
+        if (previewImg && currentUser?.avatar) {
+          previewImg.src = currentUser.avatar;
+        }
+
+        const s = currentUser?.socials || {};
+        document.getElementById('editSocialFacebook').value = s.facebook || '';
+        document.getElementById('editSocialInstagram').value = s.instagram || '';
+        document.getElementById('editSocialTwitter').value = s.twitter || '';
+        document.getElementById('editSocialWebsite').value = s.website || '';
+        
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    };
+
+    window.handleSaveProfile = function(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const oldName = currentUser.name;
+      currentUser.name = document.getElementById('editName').value.trim();
+      
+      if (currentUploadedAvatarBase64) {
+        currentUser.avatar = currentUploadedAvatarBase64;
+      }
+      
+      currentUser.bio = document.getElementById('editBio').value.trim();
+      currentUser.socials = {
+        facebook: document.getElementById('editSocialFacebook').value.trim(),
+        instagram: document.getElementById('editSocialInstagram').value.trim(),
+        twitter: document.getElementById('editSocialTwitter').value.trim(),
+        website: document.getElementById('editSocialWebsite').value.trim()
+      };
+
+      if (oldName !== currentUser.name) {
+        novelsData.forEach(n => {
+          if (n.authorId === currentUser.uid || n.author === oldName) {
+            n.author = currentUser.name;
+          }
+        });
+        saveStoredNovels(novelsData);
+        renderHomeNovels();
+      }
+
+      saveUserProfileToStorage(currentUser);
+      renderAuthUI();
+      toggleEditProfileModal();
+      openAuthorProfile(currentUser.uid, currentUser.name);
+      showToast('Profile Saved!');
+    };
+
+    // Writer Studio Publishing
+    let currentUploadedCoverBase64 = "";
+
+    window.handleCoverFileSelect = function(event) {
+      const file = event.target.files[0];
+      const fileNameEl = document.getElementById('pubCoverFileName');
+      const previewContainer = document.getElementById('pubCoverPreviewContainer');
+      const previewImg = document.getElementById('pubCoverPreview');
+
+      if (file) {
+        if (fileNameEl) fileNameEl.innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentUploadedCoverBase64 = e.target.result;
+          if (previewImg) previewImg.src = currentUploadedCoverBase64;
+          if (previewContainer) previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        currentUploadedCoverBase64 = "";
+        if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
+        if (previewContainer) previewContainer.classList.add('hidden');
+      }
+    };
+
+    window.handlePublishStory = function(e) {
+      e.preventDefault();
+      
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const title = document.getElementById('pubTitle').value.trim();
+      const genre = document.getElementById('pubGenre').value;
+      const language = document.getElementById('pubLanguage').value;
+      const coverUrl = currentUploadedCoverBase64 || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+      const description = document.getElementById('pubDesc').value.trim();
+      
+      const chapNum = parseInt(document.getElementById('pubChapNum').value) || 1;
+      const chapTitle = document.getElementById('pubChapTitle').value.trim();
+      const chapContent = document.getElementById('pubChapContent').value.trim();
+
+      const newNovel = {
+        id: 'ink_' + Date.now(),
+        title: title,
+        author: currentUser.name,
+        authorId: currentUser.uid,
+        genre: genre,
+        language: language,
+        coverUrl: coverUrl,
+        description: description,
+        views: 1,
+        updatedAt: Date.now(),
+        chapters: [
+          { number: chapNum, title: chapTitle, content: chapContent }
+        ],
+        comments: []
+      };
+
+      novelsData.unshift(newNovel);
+      saveStoredNovels(novelsData);
+
+      document.getElementById('publishForm').reset();
+      currentUploadedCoverBase64 = "";
+      const fileNameEl = document.getElementById('pubCoverFileName');
+      const previewContainer = document.getElementById('pubCoverPreviewContainer');
+      if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
+      if (previewContainer) previewContainer.classList.add('hidden');
+
+      showToast('Novel Published Successfully!');
+      renderHomeNovels();
+      openBookDetail(newNovel.id);
+    };
+
+    window.saveAsDraft = function() {
+      showToast('Draft Saved');
+    };
+
+    window.shareBook = function() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Book link copied to clipboard!');
+      } else {
+        showToast('Link sharing enabled!');
+      }
+    };
+
+    // Auth Handlers
+    window.openAuthModal = function() {
+      const modal = document.getElementById('authModal');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeAuthModal = function() {
+      const modal = document.getElementById('authModal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleGoogleSignIn = function() {
+      const googleId = 'user_g_default_author';
+      const existingProfile = loadUserProfileFromStorage(googleId);
+
+      currentUser = existingProfile || {
+        uid: googleId,
+        name: 'Google Author',
+        email: 'author@gmail.com',
+        avatar: '',
+        bio: 'Bestselling author on Inkfinity.',
+        socials: { facebook: '', instagram: '', twitter: '', website: '' }
+      };
+
+      saveUserProfileToStorage(currentUser);
+      renderAuthUI();
+      closeAuthModal();
+      showToast('Signed in with Google');
+    };
+
+    window.handleEmailAuth = function(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('authName');
+      const emailInput = document.getElementById('authEmail');
+      if (!nameInput || !emailInput) return;
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const uid = 'user_' + btoa(email.toLowerCase()).replace(/=/g, '');
+
+      const existingProfile = loadUserProfileFromStorage(uid);
+
+      currentUser = existingProfile || {
+        uid: uid,
+        name: name,
+        email: email,
+        avatar: '',
+        bio: '',
+        socials: { facebook: '', instagram: '', twitter: '', website: '' }
+      };
+
+      saveUserProfileToStorage(currentUser);
+      renderAuthUI();
+      closeAuthModal();
+      showToast(`Welcome back, ${currentUser.name}!`);
+    };
+
+    window.handleSignOut = function() {
+      currentUser = null;
+      localStorage.removeItem('inkfinity_active_user');
+      renderAuthUI();
+      showToast('Signed Out');
+    };
+
+    // Toast Helper
+    window.showToast = function(msg) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMsg');
+      if (!toast || !msgEl) return;
+
+      msgEl.innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    };
+
+    function formatNumber(num) {
+      if (!num) return '0';
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toString();
+    }
+  </script>
+</body>
+</html>
