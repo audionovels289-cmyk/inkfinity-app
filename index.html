@@ -676,8 +676,7 @@
       signInWithEmailAndPassword, 
       createUserWithEmailAndPassword, 
       signOut, 
-      onAuthStateChanged,
-      updateProfile 
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
     import { 
       getFirestore, 
@@ -689,9 +688,7 @@
       updateDoc, 
       arrayUnion, 
       increment, 
-      onSnapshot, 
-      query, 
-      orderBy 
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
     // Your Firebase Configuration Keys
@@ -797,7 +794,7 @@
 
     // App State Variables
     window.currentUser = null;
-    window.novelsData = [];
+    window.novelsData = INITIAL_NOVELS;
     window.selectedGenre = "All";
     window.searchQuery = "";
     window.currentBookId = null;
@@ -809,6 +806,8 @@
     // Initialize Firestore Data Sync & Auth State Listeners
     window.addEventListener('DOMContentLoaded', async () => {
       renderGenreChips();
+      renderHomeNovels();
+      updateHeroBanner();
 
       // Check if initial novels exist in Firestore; if empty, seed initial data
       try {
@@ -822,20 +821,23 @@
         console.error("Error seeding initial Firestore data:", err);
       }
 
-      // Real-time listener for Novels Collection from Firestore
+      // Real-time listener for Novels Collection from Firestore (Smooth Sync)
       onSnapshot(collection(db, "novels"), (snapshot) => {
-        window.novelsData = [];
+        const temp = [];
         snapshot.forEach((docSnap) => {
-          window.novelsData.push({ id: docSnap.id, ...docSnap.data() });
+          temp.push({ id: docSnap.id, ...docSnap.data() });
         });
-        renderHomeNovels();
-        updateHeroBanner();
-        if (window.currentBookId) {
-          openBookDetail(window.currentBookId, true);
+        if (temp.length > 0) {
+          window.novelsData = temp;
+          renderHomeNovels();
+          updateHeroBanner();
+          if (window.currentBookId) {
+            openBookDetail(window.currentBookId, true);
+          }
         }
       });
 
-      // Firebase Auth state listener (Optimized)
+      // Firebase Auth state listener
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           let profileData = null;
@@ -1493,7 +1495,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
             
-            // Compress to JPEG with 0.7 quality to stay under 1MB Firestore limit
             window.currentUploadedCoverBase64 = canvas.toDataURL('image/jpeg', 0.7);
             if (previewImg) previewImg.src = window.currentUploadedCoverBase64;
             if (previewContainer) previewContainer.classList.remove('hidden');
@@ -1576,7 +1577,7 @@
       }
     };
 
-    // Firebase Auth Handlers
+    // Firebase Auth Handlers (Preserves Custom Profiles)
     window.openAuthModal = function() {
       const modal = document.getElementById('authModal');
       if (modal) modal.classList.remove('hidden');
@@ -1596,16 +1597,31 @@
         const user = result.user;
         
         const userRef = doc(db, "users", user.uid);
-        const userPayload = {
-          uid: user.uid,
-          name: user.displayName || user.email.split('@')[0],
-          email: user.email,
-          avatar: user.photoURL || '',
-          bio: 'Bestselling author on Inkfinity.',
-          socials: { facebook: '', instagram: '', twitter: '', website: '' }
-        };
-        await setDoc(userRef, userPayload, { merge: true });
+        const existingSnap = await getDoc(userRef);
 
+        let userPayload;
+        if (existingSnap.exists()) {
+          const existingData = existingSnap.data();
+          userPayload = {
+            uid: user.uid,
+            name: existingData.name || user.displayName || user.email.split('@')[0],
+            email: user.email,
+            avatar: existingData.avatar || user.photoURL || '',
+            bio: existingData.bio || 'Bestselling author on Inkfinity.',
+            socials: existingData.socials || { facebook: '', instagram: '', twitter: '', website: '' }
+          };
+        } else {
+          userPayload = {
+            uid: user.uid,
+            name: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            avatar: user.photoURL || '',
+            bio: 'Bestselling author on Inkfinity.',
+            socials: { facebook: '', instagram: '', twitter: '', website: '' }
+          };
+        }
+
+        await setDoc(userRef, userPayload, { merge: true });
         showToast('Signed in with Google Successfully!');
       } catch (err) {
         if (err.code === 'auth/popup-closed-by-user' || auth.currentUser) {
@@ -1638,18 +1654,33 @@
 
         const user = userCredential.user;
         const userRef = doc(db, "users", user.uid);
-        const userPayload = {
-          uid: user.uid,
-          name: name,
-          email: email,
-          avatar: '',
-          bio: '',
-          socials: { facebook: '', instagram: '', twitter: '', website: '' }
-        };
-        await setDoc(userRef, userPayload, { merge: true });
+        const existingSnap = await getDoc(userRef);
 
+        let userPayload;
+        if (existingSnap.exists()) {
+          const existingData = existingSnap.data();
+          userPayload = {
+            uid: user.uid,
+            name: existingData.name || name,
+            email: email,
+            avatar: existingData.avatar || '',
+            bio: existingData.bio || '',
+            socials: existingData.socials || { facebook: '', instagram: '', twitter: '', website: '' }
+          };
+        } else {
+          userPayload = {
+            uid: user.uid,
+            name: name,
+            email: email,
+            avatar: '',
+            bio: '',
+            socials: { facebook: '', instagram: '', twitter: '', website: '' }
+          };
+        }
+
+        await setDoc(userRef, userPayload, { merge: true });
         closeAuthModal();
-        showToast(`Welcome, ${name}!`);
+        showToast(`Welcome, ${userPayload.name}!`);
       } catch (err) {
         console.error("Email Auth Error:", err);
         showToast('Authentication failed: ' + err.message);
