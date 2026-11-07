@@ -1508,11 +1508,15 @@
         if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
         if (previewContainer) previewContainer.classList.add('hidden');
 
-        showToast('Novel Published to Firebase!');
+        showToast('Novel Published Successfully!');
+        
+        // Instantly add to local array and jump to book details
+        window.novelsData.unshift(newNovel);
+        renderHomeNovels();
         openBookDetail(newNovelId);
       } catch (err) {
         console.error("Error publishing novel:", err);
-        showToast('Failed to publish novel.');
+        showToast('Failed to publish novel: ' + err.message);
       }
     };
 
@@ -1542,14 +1546,12 @@
 
     window.handleGoogleSignIn = async function() {
       const provider = new GoogleAuthProvider();
-      // Close modal immediately so it doesn't stay stuck over the page
       closeAuthModal();
 
       try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         
-        // Save or merge user profile in Firestore
         const userRef = doc(db, "users", user.uid);
         const userPayload = {
           uid: user.uid,
@@ -1563,7 +1565,6 @@
 
         showToast('Signed in with Google Successfully!');
       } catch (err) {
-        // Ignore popup-closed-by-user or background race conditions if already logged in via state listener
         if (err.code === 'auth/popup-closed-by-user' || auth.currentUser) {
           console.log("Authentication handled by Auth observer.");
           return;
@@ -1587,10 +1588,8 @@
       try {
         let userCredential;
         try {
-          // Try signing in first
           userCredential = await signInWithEmailAndPassword(auth, email, password);
         } catch (signInErr) {
-          // If account doesn't exist, create it
           userCredential = await createUserWithEmailAndPassword(auth, email, password);
         }
 
