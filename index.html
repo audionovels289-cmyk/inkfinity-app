@@ -666,9 +666,49 @@
     <span id="toastMsg" class="text-sm font-medium">Notification message</span>
   </div>
 
-  <!-- ================= JAVASCRIPT APPLICATION LOGIC ================= -->
-  <script>
-    // Default Web Novels Seed Data
+  <!-- ================= FIREBASE SDKS & APP LOGIC ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      updateProfile 
+    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      getDocs, 
+      setDoc, 
+      updateDoc, 
+      arrayUnion, 
+      increment, 
+      onSnapshot, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+    // Your Firebase Configuration Keys
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiwQnD_kieBnOwyT0K7opqk4ymKGvrCZ0",
+      authDomain: "inkfinity-ec113.firebaseapp.com",
+      projectId: "inkfinity-ec113",
+      storageBucket: "inkfinity-ec113.firebasestorage.app",
+      messagingSenderId: "143278939288",
+      appId: "1:143278939288:web:08b091285dbf668b5a84ed"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Default Seed Novels for initial setup
     const INITIAL_NOVELS = [
       {
         id: "ink_1",
@@ -681,19 +721,11 @@
         description: "In a galaxy governed by ancient ink-magic and star-smiths, a renegade scribe discovers a spell that can rewrite destiny itself.",
         views: 28400,
         updatedAt: Date.now(),
-        authorBio: "Bestselling space opera & urban fantasy writer crafting cosmic tales.",
-        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-        authorSocial: "https://facebook.com/astridcole",
         chapters: [
           {
             number: 1,
             title: "Chapter 1: The Constellation Vault",
             content: "The astral observatory hummed with quiet resonance. Astrid turned the brass dials, watching liquid starlight flow through the glass quills of the celestial manuscript.\n\n'If the Council catches you transcribing forbidden star maps,' whispered Kael from the doorway, 'they will bind your hands in obsidian glass.'\n\nAstrid didn't pause her quill. 'Then let them try. The stars are burning out, Kael. Someone has to rewrite the sky.'"
-          },
-          {
-            number: 2,
-            title: "Chapter 2: Starlight & Shadow",
-            content: "The rift opened in silence. Pure indigo ink bled across the observatory floor, glowing with ethereal heat. From the void stepped a figure wrapped in woven shadows."
           }
         ],
         comments: [
@@ -711,9 +743,6 @@
         description: "An exiled potion-maker uncovers a royal conspiracy brewing inside the forbidden alchemy tower of Eldoria.",
         views: 19200,
         updatedAt: Date.now() - 43200000,
-        authorBio: "Dark fantasy worldbuilder obsessed with potions, dragons, and ancient ruins.",
-        authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-        authorSocial: "https://twitter.com/damianvance",
         chapters: [
           {
             number: 1,
@@ -734,9 +763,6 @@
         description: "A chance encounter at a Parisian masquerade ball sets off an unforgettable summer romance between two rival art restorers.",
         views: 31500,
         updatedAt: Date.now() - 86400000,
-        authorBio: "Romance novelist writing modern fairytales across European cities.",
-        authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
-        authorSocial: "https://instagram.com/sophialaurent",
         chapters: [
           {
             number: 1,
@@ -757,9 +783,6 @@
         description: "An abandoned ocean lighthouse begins transmitting radio signals forty years after its entire crew mysteriously vanished.",
         views: 11400,
         updatedAt: Date.now() - 172800000,
-        authorBio: "Horror and mystery novelist crafting eerie nautical tales.",
-        authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-        authorSocial: "",
         chapters: [
           {
             number: 1,
@@ -771,100 +794,89 @@
       }
     ];
 
-    // Local Storage Data Wrappers
-    function getStoredNovels() {
-      const stored = localStorage.getItem('inkfinity_novels');
-      if (!stored) {
-        localStorage.setItem('inkfinity_novels', JSON.stringify(INITIAL_NOVELS));
-        return INITIAL_NOVELS;
-      }
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return INITIAL_NOVELS;
-      }
-    }
+    // App State Variables
+    window.currentUser = null;
+    window.novelsData = [];
+    window.selectedGenre = "All";
+    window.searchQuery = "";
+    window.currentBookId = null;
+    window.currentChapterIdx = 0;
+    window.readerDirection = "ltr";
+    window.currentUploadedAvatarBase64 = "";
+    window.currentUploadedCoverBase64 = "";
 
-    function saveStoredNovels(novels) {
-      localStorage.setItem('inkfinity_novels', JSON.stringify(novels));
-    }
-
-    function getBookmarks() {
-      try {
-        return JSON.parse(localStorage.getItem('inkfinity_bookmarks') || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveBookmarks(bm) {
-      localStorage.setItem('inkfinity_bookmarks', JSON.stringify(bm));
-    }
-
-    // App State
-    let currentUser = null;
-    let novelsData = getStoredNovels();
-    let selectedGenre = "All";
-    let searchQuery = "";
-    let currentBookId = null;
-    let currentChapterIdx = 0;
-    let readerDirection = "ltr";
-
-    // App Lifecycle Initializer
-    window.onload = function() {
-      const localUser = localStorage.getItem('inkfinity_active_user');
-      if (localUser) {
-        try {
-          const parsed = JSON.parse(localUser);
-          currentUser = loadUserProfileFromStorage(parsed.uid) || parsed;
-        } catch (e) {
-          currentUser = null;
-        }
-      }
-
-      renderAuthUI();
+    // Initialize Firestore Data Sync & Auth State Listeners
+    window.addEventListener('DOMContentLoaded', async () => {
       renderGenreChips();
-      renderHomeNovels();
-      updateHeroBanner();
-    };
 
-    // User Profile Persistence Registry
-    function getUserProfilesMap() {
+      // Check if initial novels exist in Firestore; if empty, seed initial data
       try {
-        return JSON.parse(localStorage.getItem('inkfinity_user_profiles') || '{}');
-      } catch (e) {
-        return {};
+        const novelsSnap = await getDocs(collection(db, "novels"));
+        if (novelsSnap.empty) {
+          for (const nov of INITIAL_NOVELS) {
+            await setDoc(doc(db, "novels", nov.id), nov);
+          }
+        }
+      } catch (err) {
+        console.error("Error seeding initial Firestore data:", err);
       }
-    }
 
-    function saveUserProfileToStorage(profile) {
-      if (!profile || !profile.uid) return;
-      const profiles = getUserProfilesMap();
-      profiles[profile.uid] = profile;
-      localStorage.setItem('inkfinity_user_profiles', JSON.stringify(profiles));
-      localStorage.setItem('inkfinity_active_user', JSON.stringify(profile));
-    }
+      // Real-time listener for Novels Collection from Firestore
+      onSnapshot(collection(db, "novels"), (snapshot) => {
+        window.novelsData = [];
+        snapshot.forEach((docSnap) => {
+          window.novelsData.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderHomeNovels();
+        updateHeroBanner();
+        if (window.currentBookId) {
+          openBookDetail(window.currentBookId, true);
+        }
+      });
 
-    function loadUserProfileFromStorage(uid) {
-      const profiles = getUserProfilesMap();
-      return profiles[uid] || null;
-    }
+      // Firebase Auth state listener
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // Fetch user profile document from Firestore
+          const userDocRef = doc(db, "users", user.uid);
+          const userSnap = await getDocs(query(collection(db, "users"))); // or direct get
+          // Let's fetch specifically
+          const docSnap = await getDocs(collection(db, "users"));
+          let profileData = null;
+          docSnap.forEach(d => {
+            if (d.id === user.uid) profileData = d.data();
+          });
+
+          window.currentUser = {
+            uid: user.uid,
+            name: profileData?.name || user.displayName || user.email.split('@')[0],
+            email: user.email,
+            avatar: profileData?.avatar || user.photoURL || '',
+            bio: profileData?.bio || '',
+            socials: profileData?.socials || { facebook: '', instagram: '', twitter: '', website: '' }
+          };
+        } else {
+          window.currentUser = null;
+        }
+        renderAuthUI();
+      });
+    });
 
     // Render Navbar Auth Area
     window.renderAuthUI = function() {
       const authArea = document.getElementById('authArea');
       if (!authArea) return;
 
-      if (currentUser) {
+      if (window.currentUser) {
         authArea.innerHTML = `
           <div class="flex items-center gap-3">
-            <button onclick="openAuthorProfile('${currentUser.uid}', '${currentUser.name.replace(/'/g, "\\'")}')" class="flex items-center gap-2 hover:opacity-80 transition">
+            <button onclick="openAuthorProfile('${window.currentUser.uid}', '${window.currentUser.name.replace(/'/g, "\\'")}')" class="flex items-center gap-2 hover:opacity-80 transition">
               <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-ink-600 to-purple-600 flex items-center justify-center font-extrabold text-white text-xs shadow-md border border-ink-500/50 overflow-hidden">
-                ${currentUser.avatar 
-                  ? `<img src="${currentUser.avatar}" class="w-full h-full object-cover">` 
-                  : currentUser.name.charAt(0).toUpperCase()}
+                ${window.currentUser.avatar 
+                  ? `<img src="${window.currentUser.avatar}" class="w-full h-full object-cover">` 
+                  : window.currentUser.name.charAt(0).toUpperCase()}
               </div>
-              <span class="text-xs font-bold text-gray-200 hidden lg:inline">${currentUser.name}</span>
+              <span class="text-xs font-bold text-gray-200 hidden lg:inline">${window.currentUser.name}</span>
             </button>
             <button onclick="handleSignOut()" class="p-2 text-gray-400 hover:text-rose-400 text-xs" title="Sign Out">
               <i class="fa-solid fa-right-from-bracket text-sm"></i>
@@ -910,7 +922,7 @@
       bar.innerHTML = GENRES.map(g => `
         <button onclick="filterByGenre('${g}')" 
           class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition border ${
-            selectedGenre === g 
+            window.selectedGenre === g 
               ? 'bg-gradient-to-r from-ink-600 to-purple-600 text-white border-ink-500 shadow-lg shadow-ink-600/30' 
               : 'bg-ink-950/80 text-gray-300 border-ink-800/80 hover:border-ink-600 hover:text-white'
           }">
@@ -920,7 +932,7 @@
     };
 
     window.filterByGenre = function(genre) {
-      selectedGenre = genre;
+      window.selectedGenre = genre;
       renderGenreChips();
       renderHomeNovels();
       const label = document.getElementById('genreCountLabel');
@@ -928,13 +940,13 @@
     };
 
     window.handleSearch = function(val) {
-      searchQuery = val.toLowerCase().trim();
+      window.searchQuery = val.toLowerCase().trim();
       renderHomeNovels();
     };
 
     window.resetFilters = function() {
-      selectedGenre = "All";
-      searchQuery = "";
+      window.selectedGenre = "All";
+      window.searchQuery = "";
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = "";
       renderGenreChips();
@@ -950,16 +962,16 @@
 
       if (!grid) return;
 
-      let filtered = novelsData.filter(n => {
-        const matchesGenre = selectedGenre === "All" || n.genre === selectedGenre;
-        const matchesSearch = !searchQuery || 
-          n.title.toLowerCase().includes(searchQuery) || 
-          n.author.toLowerCase().includes(searchQuery) ||
-          n.genre.toLowerCase().includes(searchQuery);
+      let filtered = window.novelsData.filter(n => {
+        const matchesGenre = window.selectedGenre === "All" || n.genre === window.selectedGenre;
+        const matchesSearch = !window.searchQuery || 
+          n.title.toLowerCase().includes(window.searchQuery) || 
+          n.author.toLowerCase().includes(window.searchQuery) ||
+          n.genre.toLowerCase().includes(window.searchQuery);
         return matchesGenre && matchesSearch;
       });
 
-      if (sortBy === 'views') filtered.sort((a,b) => b.views - a.views);
+      if (sortBy === 'views') filtered.sort((a,b) => (b.views || 0) - (a.views || 0));
       else if (sortBy === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title));
       else filtered.sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
@@ -997,8 +1009,8 @@
     };
 
     function updateHeroBanner() {
-      if (novelsData.length > 0) {
-        const top = novelsData[0];
+      if (window.novelsData.length > 0) {
+        const top = window.novelsData[0];
         const titleEl = document.getElementById('heroTitle');
         const descEl = document.getElementById('heroDesc');
         const authorEl = document.getElementById('heroAuthor');
@@ -1014,13 +1026,13 @@
     }
 
     window.readBookFromHero = function() {
-      if (novelsData.length > 0) openBookDetail(novelsData[0].id);
+      if (window.novelsData.length > 0) openBookDetail(window.novelsData[0].id);
     };
 
     // Book Detail Page
-    window.openBookDetail = function(bookId) {
-      currentBookId = bookId;
-      const novel = novelsData.find(n => n.id === bookId);
+    window.openBookDetail = function(bookId, skipTabSwitch = false) {
+      window.currentBookId = bookId;
+      const novel = window.novelsData.find(n => n.id === bookId);
       if (!novel) return;
 
       document.getElementById('detailCover').src = novel.coverUrl;
@@ -1059,19 +1071,26 @@
         `).join('');
       }
 
-      showTab('book-detail');
+      if (!skipTabSwitch) showTab('book-detail');
     };
 
     // Reader Interface
-    window.openReader = function(bookId, chapIdx) {
-      currentBookId = bookId;
-      currentChapterIdx = chapIdx;
+    window.openReader = async function(bookId, chapIdx) {
+      window.currentBookId = bookId;
+      window.currentChapterIdx = chapIdx;
 
-      const novel = novelsData.find(n => n.id === bookId);
+      const novel = window.novelsData.find(n => n.id === bookId);
       if (!novel || !novel.chapters || !novel.chapters[chapIdx]) return;
 
-      novel.views = (novel.views || 0) + 1;
-      saveStoredNovels(novelsData);
+      // Increment view count in Firestore
+      try {
+        const bookRef = doc(db, "novels", bookId);
+        await updateDoc(bookRef, {
+          views: increment(1)
+        });
+      } catch (err) {
+        console.error("Error updating views:", err);
+      }
 
       const chap = novel.chapters[chapIdx];
 
@@ -1089,12 +1108,12 @@
     };
 
     window.startReadingCurrentBook = function() {
-      if (currentBookId) openReader(currentBookId, 0);
+      if (window.currentBookId) openReader(window.currentBookId, 0);
     };
 
     window.navigateChapter = function(dir) {
-      const newIdx = currentChapterIdx + dir;
-      if (currentBookId) openReader(currentBookId, newIdx);
+      const newIdx = window.currentChapterIdx + dir;
+      if (window.currentBookId) openReader(window.currentBookId, newIdx);
     };
 
     // Reader Customizers
@@ -1116,12 +1135,12 @@
     window.toggleReaderDirection = function() {
       const container = document.getElementById('readerContainer');
       const btn = document.getElementById('dirToggleBtn');
-      if (readerDirection === 'ltr') {
-        readerDirection = 'rtl';
+      if (window.readerDirection === 'ltr') {
+        window.readerDirection = 'rtl';
         if (container) container.setAttribute('dir', 'rtl');
         if (btn) btn.innerHTML = `<i class="fa-solid fa-align-right me-1"></i> RTL`;
       } else {
-        readerDirection = 'ltr';
+        window.readerDirection = 'ltr';
         if (container) container.setAttribute('dir', 'ltr');
         if (btn) btn.innerHTML = `<i class="fa-solid fa-align-left me-1"></i> LTR`;
       }
@@ -1134,7 +1153,6 @@
       const comments = novel.comments || [];
 
       if (countEl) countEl.innerText = comments.length;
-
       if (!feed) return;
 
       if (comments.length === 0) {
@@ -1155,49 +1173,64 @@
       `).join('');
     }
 
-    window.postComment = function() {
+    window.postComment = async function() {
       const input = document.getElementById('commentInput');
       if (!input) return;
       const text = input.value.trim();
       if (!text) return;
 
-      if (!currentUser) {
+      if (!window.currentUser) {
         openAuthModal();
         return;
       }
 
-      const novel = novelsData.find(n => n.id === currentBookId);
-      if (!novel) return;
-
-      if (!novel.comments) novel.comments = [];
-      novel.comments.unshift({
+      const newComment = {
         id: 'c_' + Date.now(),
-        user: currentUser.name,
+        user: window.currentUser.name,
         text: text,
         timestamp: 'Just now'
-      });
+      };
 
-      saveStoredNovels(novelsData);
-      input.value = '';
-      renderComments(novel);
-      showToast('Comment posted!');
+      try {
+        const bookRef = doc(db, "novels", window.currentBookId);
+        await updateDoc(bookRef, {
+          comments: arrayUnion(newComment)
+        });
+        input.value = '';
+        showToast('Comment posted!');
+      } catch (err) {
+        console.error("Error posting comment:", err);
+        showToast('Failed to post comment.');
+      }
     };
 
-    // Bookmarking
+    // Bookmarking (Local Bookmarks or Cloud)
+    function getBookmarks() {
+      try {
+        return JSON.parse(localStorage.getItem('inkfinity_bookmarks') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveBookmarks(bm) {
+      localStorage.setItem('inkfinity_bookmarks', JSON.stringify(bm));
+    }
+
     window.toggleBookmarkCurrentBook = function() {
-      if (!currentBookId) return;
+      if (!window.currentBookId) return;
       let bms = getBookmarks();
-      if (bms.includes(currentBookId)) {
-        bms = bms.filter(id => id !== currentBookId);
+      if (bms.includes(window.currentBookId)) {
+        bms = bms.filter(id => id !== window.currentBookId);
         showToast('Removed from Library');
       } else {
-        bms.push(currentBookId);
+        bms.push(window.currentBookId);
         showToast('Saved to Library!');
       }
       saveBookmarks(bms);
       
       const bmBtn = document.getElementById('bookmarkBtn');
-      const isBookmarked = bms.includes(currentBookId);
+      const isBookmarked = bms.includes(window.currentBookId);
       if (bmBtn) {
         bmBtn.innerHTML = isBookmarked 
           ? `<i class="fa-solid fa-bookmark text-amber-400"></i> Bookmarked` 
@@ -1211,8 +1244,7 @@
       const bms = getBookmarks();
 
       if (!grid) return;
-
-      const savedNovels = novelsData.filter(n => bms.includes(n.id));
+      const savedNovels = window.novelsData.filter(n => bms.includes(n.id));
 
       if (savedNovels.length === 0) {
         grid.innerHTML = '';
@@ -1234,27 +1266,39 @@
 
     // Author Profile Views
     window.openAuthorProfileFromDetail = function() {
-      const novel = novelsData.find(n => n.id === currentBookId);
+      const novel = window.novelsData.find(n => n.id === window.currentBookId);
       if (novel) openAuthorProfile(novel.authorId, novel.author);
     };
 
     window.openCurrentProfile = function() {
-      if (currentUser) {
-        openAuthorProfile(currentUser.uid, currentUser.name);
+      if (window.currentUser) {
+        openAuthorProfile(window.currentUser.uid, window.currentUser.name);
       } else {
         openAuthModal();
       }
     };
 
-    window.openAuthorProfile = function(authorId, authorName) {
-      const sample = novelsData.find(n => n.author === authorName || n.authorId === authorId);
+    window.openAuthorProfile = async function(authorId, authorName) {
+      const sample = window.novelsData.find(n => n.author === authorName || n.authorId === authorId);
       
-      const isSelf = currentUser && (currentUser.uid === authorId || currentUser.name === authorName);
-      const profile = isSelf ? currentUser : loadUserProfileFromStorage(authorId);
+      let profile = null;
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        snap.forEach(d => {
+          if (d.id === authorId || d.data().name === authorName) {
+            profile = d.data();
+          }
+        });
+      } catch (err) {
+        console.error("Error fetching author profile:", err);
+      }
 
-      const displayName = profile?.name || authorName;
-      const displayBio = profile?.bio || sample?.authorBio || 'Web novel author publishing on Inkfinity.';
-      const displayAvatar = profile?.avatar || sample?.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
+      const isSelf = window.currentUser && (window.currentUser.uid === authorId || window.currentUser.name === authorName);
+      const activeProfile = isSelf ? window.currentUser : profile;
+
+      const displayName = activeProfile?.name || authorName;
+      const displayBio = activeProfile?.bio || sample?.authorBio || 'Web novel author publishing on Inkfinity.';
+      const displayAvatar = activeProfile?.avatar || sample?.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
       
       const nameEl = document.getElementById('authorName');
       const bioEl = document.getElementById('authorBio');
@@ -1264,7 +1308,6 @@
       if (bioEl) bioEl.innerText = displayBio;
       if (avatarEl) avatarEl.src = displayAvatar;
 
-      // Show Edit Profile button if visiting own profile
       const editBtn = document.getElementById('editProfileBtn');
       if (editBtn) {
         if (isSelf) editBtn.classList.remove('hidden');
@@ -1274,11 +1317,8 @@
       // Render Multi-Social Links
       const socialsEl = document.getElementById('authorSocials');
       if (socialsEl) {
-        const socials = profile?.socials || {
-          facebook: sample?.authorSocial || '',
-          instagram: '',
-          twitter: '',
-          website: ''
+        const socials = activeProfile?.socials || {
+          facebook: '', instagram: '', twitter: '', website: ''
         };
 
         let socialBadgesHTML = '';
@@ -1310,7 +1350,7 @@
         socialsEl.innerHTML = socialBadgesHTML || `<span class="text-xs text-gray-500 italic">No social links provided.</span>`;
       }
 
-      const authorNovels = novelsData.filter(n => n.author === authorName || n.authorId === authorId);
+      const authorNovels = window.novelsData.filter(n => n.author === authorName || n.authorId === authorId);
       const grid = document.getElementById('authorNovelsGrid');
       
       if (grid) {
@@ -1328,8 +1368,6 @@
     };
 
     // Avatar File Picker
-    let currentUploadedAvatarBase64 = "";
-
     window.handleAvatarFileSelect = function(event) {
       const file = event.target.files[0];
       const fileNameEl = document.getElementById('editAvatarFileName');
@@ -1339,8 +1377,8 @@
         if (fileNameEl) fileNameEl.innerText = file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
-          currentUploadedAvatarBase64 = e.target.result;
-          if (previewImg) previewImg.src = currentUploadedAvatarBase64;
+          window.currentUploadedAvatarBase64 = e.target.result;
+          if (previewImg) previewImg.src = window.currentUploadedAvatarBase64;
         };
         reader.readAsDataURL(file);
       }
@@ -1351,15 +1389,15 @@
       const modal = document.getElementById('profileEditModal');
       if (!modal) return;
       if (modal.classList.contains('hidden')) {
-        document.getElementById('editName').value = currentUser?.name || '';
-        document.getElementById('editBio').value = currentUser?.bio || '';
+        document.getElementById('editName').value = window.currentUser?.name || '';
+        document.getElementById('editBio').value = window.currentUser?.bio || '';
         
         const previewImg = document.getElementById('editAvatarPreview');
-        if (previewImg && currentUser?.avatar) {
-          previewImg.src = currentUser.avatar;
+        if (previewImg && window.currentUser?.avatar) {
+          previewImg.src = window.currentUser.avatar;
         }
 
-        const s = currentUser?.socials || {};
+        const s = window.currentUser?.socials || {};
         document.getElementById('editSocialFacebook').value = s.facebook || '';
         document.getElementById('editSocialInstagram').value = s.instagram || '';
         document.getElementById('editSocialTwitter').value = s.twitter || '';
@@ -1371,45 +1409,36 @@
       }
     };
 
-    window.handleSaveProfile = function(e) {
+    window.handleSaveProfile = async function(e) {
       e.preventDefault();
-      if (!currentUser) return;
+      if (!window.currentUser) return;
 
-      const oldName = currentUser.name;
-      currentUser.name = document.getElementById('editName').value.trim();
-      
-      if (currentUploadedAvatarBase64) {
-        currentUser.avatar = currentUploadedAvatarBase64;
+      window.currentUser.name = document.getElementById('editName').value.trim();
+      if (window.currentUploadedAvatarBase64) {
+        window.currentUser.avatar = window.currentUploadedAvatarBase64;
       }
-      
-      currentUser.bio = document.getElementById('editBio').value.trim();
-      currentUser.socials = {
+      window.currentUser.bio = document.getElementById('editBio').value.trim();
+      window.currentUser.socials = {
         facebook: document.getElementById('editSocialFacebook').value.trim(),
         instagram: document.getElementById('editSocialInstagram').value.trim(),
         twitter: document.getElementById('editSocialTwitter').value.trim(),
         website: document.getElementById('editSocialWebsite').value.trim()
       };
 
-      if (oldName !== currentUser.name) {
-        novelsData.forEach(n => {
-          if (n.authorId === currentUser.uid || n.author === oldName) {
-            n.author = currentUser.name;
-          }
-        });
-        saveStoredNovels(novelsData);
-        renderHomeNovels();
+      try {
+        const userRef = doc(db, "users", window.currentUser.uid);
+        await setDoc(userRef, window.currentUser, { merge: true });
+        renderAuthUI();
+        toggleEditProfileModal();
+        openAuthorProfile(window.currentUser.uid, window.currentUser.name);
+        showToast('Profile Saved to Cloud!');
+      } catch (err) {
+        console.error("Error saving profile:", err);
+        showToast('Failed to save profile.');
       }
-
-      saveUserProfileToStorage(currentUser);
-      renderAuthUI();
-      toggleEditProfileModal();
-      openAuthorProfile(currentUser.uid, currentUser.name);
-      showToast('Profile Saved!');
     };
 
     // Writer Studio Publishing
-    let currentUploadedCoverBase64 = "";
-
     window.handleCoverFileSelect = function(event) {
       const file = event.target.files[0];
       const fileNameEl = document.getElementById('pubCoverFileName');
@@ -1420,22 +1449,22 @@
         if (fileNameEl) fileNameEl.innerText = file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
-          currentUploadedCoverBase64 = e.target.result;
-          if (previewImg) previewImg.src = currentUploadedCoverBase64;
+          window.currentUploadedCoverBase64 = e.target.result;
+          if (previewImg) previewImg.src = window.currentUploadedCoverBase64;
           if (previewContainer) previewContainer.classList.remove('hidden');
         };
         reader.readAsDataURL(file);
       } else {
-        currentUploadedCoverBase64 = "";
+        window.currentUploadedCoverBase64 = "";
         if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
         if (previewContainer) previewContainer.classList.add('hidden');
       }
     };
 
-    window.handlePublishStory = function(e) {
+    window.handlePublishStory = async function(e) {
       e.preventDefault();
       
-      if (!currentUser) {
+      if (!window.currentUser) {
         openAuthModal();
         return;
       }
@@ -1443,18 +1472,19 @@
       const title = document.getElementById('pubTitle').value.trim();
       const genre = document.getElementById('pubGenre').value;
       const language = document.getElementById('pubLanguage').value;
-      const coverUrl = currentUploadedCoverBase64 || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+      const coverUrl = window.currentUploadedCoverBase64 || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
       const description = document.getElementById('pubDesc').value.trim();
       
       const chapNum = parseInt(document.getElementById('pubChapNum').value) || 1;
       const chapTitle = document.getElementById('pubChapTitle').value.trim();
       const chapContent = document.getElementById('pubChapContent').value.trim();
 
+      const newNovelId = 'ink_' + Date.now();
       const newNovel = {
-        id: 'ink_' + Date.now(),
+        id: newNovelId,
         title: title,
-        author: currentUser.name,
-        authorId: currentUser.uid,
+        author: window.currentUser.name,
+        authorId: window.currentUser.uid,
         genre: genre,
         language: language,
         coverUrl: coverUrl,
@@ -1467,23 +1497,25 @@
         comments: []
       };
 
-      novelsData.unshift(newNovel);
-      saveStoredNovels(novelsData);
+      try {
+        await setDoc(doc(db, "novels", newNovelId), newNovel);
+        document.getElementById('publishForm').reset();
+        window.currentUploadedCoverBase64 = "";
+        const fileNameEl = document.getElementById('pubCoverFileName');
+        const previewContainer = document.getElementById('pubCoverPreviewContainer');
+        if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
+        if (previewContainer) previewContainer.classList.add('hidden');
 
-      document.getElementById('publishForm').reset();
-      currentUploadedCoverBase64 = "";
-      const fileNameEl = document.getElementById('pubCoverFileName');
-      const previewContainer = document.getElementById('pubCoverPreviewContainer');
-      if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
-      if (previewContainer) previewContainer.classList.add('hidden');
-
-      showToast('Novel Published Successfully!');
-      renderHomeNovels();
-      openBookDetail(newNovel.id);
+        showToast('Novel Published to Firebase!');
+        openBookDetail(newNovelId);
+      } catch (err) {
+        console.error("Error publishing novel:", err);
+        showToast('Failed to publish novel.');
+      }
     };
 
     window.saveAsDraft = function() {
-      showToast('Draft Saved');
+      showToast('Draft Saved Locally');
     };
 
     window.shareBook = function() {
@@ -1495,7 +1527,7 @@
       }
     };
 
-    // Auth Handlers
+    // Firebase Auth Handlers
     window.openAuthModal = function() {
       const modal = document.getElementById('authModal');
       if (modal) modal.classList.remove('hidden');
@@ -1506,57 +1538,80 @@
       if (modal) modal.classList.add('hidden');
     };
 
-    window.handleGoogleSignIn = function() {
-      const googleId = 'user_g_default_author';
-      const existingProfile = loadUserProfileFromStorage(googleId);
+    window.handleGoogleSignIn = async function() {
+      const provider = new GoogleAuthProvider();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Save or merge user profile in Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userPayload = {
+          uid: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          avatar: user.photoURL || '',
+          bio: 'Bestselling author on Inkfinity.',
+          socials: { facebook: '', instagram: '', twitter: '', website: '' }
+        };
+        await setDoc(userRef, userPayload, { merge: true });
 
-      currentUser = existingProfile || {
-        uid: googleId,
-        name: 'Google Author',
-        email: 'author@gmail.com',
-        avatar: '',
-        bio: 'Bestselling author on Inkfinity.',
-        socials: { facebook: '', instagram: '', twitter: '', website: '' }
-      };
-
-      saveUserProfileToStorage(currentUser);
-      renderAuthUI();
-      closeAuthModal();
-      showToast('Signed in with Google');
+        closeAuthModal();
+        showToast('Signed in with Google Successfully!');
+      } catch (err) {
+        console.error("Google Sign In Error:", err);
+        showToast('Google Sign In failed.');
+      }
     };
 
-    window.handleEmailAuth = function(e) {
+    window.handleEmailAuth = async function(e) {
       e.preventDefault();
       const nameInput = document.getElementById('authName');
       const emailInput = document.getElementById('authEmail');
-      if (!nameInput || !emailInput) return;
+      const passInput = document.getElementById('authPassword');
+      if (!nameInput || !emailInput || !passInput) return;
 
       const name = nameInput.value.trim();
       const email = emailInput.value.trim();
-      const uid = 'user_' + btoa(email.toLowerCase()).replace(/=/g, '');
+      const password = passInput.value.trim();
 
-      const existingProfile = loadUserProfileFromStorage(uid);
+      try {
+        let userCredential;
+        try {
+          // Try signing in first
+          userCredential = await signInWithEmailAndPassword(auth, email, password);
+        } catch (signInErr) {
+          // If account doesn't exist, create it
+          userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        }
 
-      currentUser = existingProfile || {
-        uid: uid,
-        name: name,
-        email: email,
-        avatar: '',
-        bio: '',
-        socials: { facebook: '', instagram: '', twitter: '', website: '' }
-      };
+        const user = userCredential.user;
+        const userRef = doc(db, "users", user.uid);
+        const userPayload = {
+          uid: user.uid,
+          name: name,
+          email: email,
+          avatar: '',
+          bio: '',
+          socials: { facebook: '', instagram: '', twitter: '', website: '' }
+        };
+        await setDoc(userRef, userPayload, { merge: true });
 
-      saveUserProfileToStorage(currentUser);
-      renderAuthUI();
-      closeAuthModal();
-      showToast(`Welcome back, ${currentUser.name}!`);
+        closeAuthModal();
+        showToast(`Welcome, ${name}!`);
+      } catch (err) {
+        console.error("Email Auth Error:", err);
+        showToast('Authentication failed: ' + err.message);
+      }
     };
 
-    window.handleSignOut = function() {
-      currentUser = null;
-      localStorage.removeItem('inkfinity_active_user');
-      renderAuthUI();
-      showToast('Signed Out');
+    window.handleSignOut = async function() {
+      try {
+        await signOut(auth);
+        showToast('Signed Out');
+      } catch (err) {
+        console.error("Sign out error:", err);
+      }
     };
 
     // Toast Helper
