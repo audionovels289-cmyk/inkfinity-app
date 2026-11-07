@@ -1542,6 +1542,9 @@
 
     window.handleGoogleSignIn = async function() {
       const provider = new GoogleAuthProvider();
+      // Close modal immediately so it doesn't stay stuck over the page
+      closeAuthModal();
+
       try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -1558,9 +1561,13 @@
         };
         await setDoc(userRef, userPayload, { merge: true });
 
-        closeAuthModal();
         showToast('Signed in with Google Successfully!');
       } catch (err) {
+        // Ignore popup-closed-by-user or background race conditions if already logged in via state listener
+        if (err.code === 'auth/popup-closed-by-user' || auth.currentUser) {
+          console.log("Authentication handled by Auth observer.");
+          return;
+        }
         console.error("Google Sign In Error:", err);
         showToast('Google Sign In failed.');
       }
