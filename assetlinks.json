@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.inkfinity.webnovels",
+        "sha256_cert_fingerprints": ["4F:6C:F6:34:D5:62:4B:60:D8:C2:1A:AA:3F:A0:B9:14:2C:43:2D:2A:C5:57:2B:E4:85:BB:8E:0D:BD:9E:A2:99"]
+      }
+    }]
