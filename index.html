@@ -264,6 +264,9 @@
             <span id="detailLanguage" class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               English
             </span>
+            <span id="detailStatusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+              Ongoing
+            </span>
           </div>
 
           <h1 id="detailTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"></h1>
@@ -459,7 +462,7 @@
                 class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <!-- Custom Genre Dropdown -->
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
@@ -496,6 +499,22 @@
                     <div onclick="selectCustomOption('pubLanguage', 'French', 'French', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">French</div>
                     <div onclick="selectCustomOption('pubLanguage', 'Arabic', 'Arabic (RTL)', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Arabic (RTL)</div>
                     <div onclick="selectCustomOption('pubLanguage', 'Urdu', 'Urdu (RTL)', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Urdu (RTL)</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Custom Status Dropdown -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1">Status *</label>
+                <div class="relative">
+                  <input type="hidden" id="pubStatus" value="Ongoing">
+                  <button type="button" onclick="toggleCustomDropdown(event, 'pubStatusMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                    <span id="pubStatusLabel">Ongoing</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                  </button>
+                  <div id="pubStatusMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                    <div onclick="selectCustomOption('pubStatus', 'Ongoing', 'Ongoing', 'pubStatusLabel', 'pubStatusMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Ongoing</div>
+                    <div onclick="selectCustomOption('pubStatus', 'Completed', 'Completed', 'pubStatusLabel', 'pubStatusMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Completed</div>
                   </div>
                 </div>
               </div>
@@ -629,7 +648,7 @@
               class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
               <div class="relative">
@@ -663,6 +682,20 @@
                   <div onclick="selectCustomOption('editPubLanguage', 'French', 'French', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">French</div>
                   <div onclick="selectCustomOption('editPubLanguage', 'Arabic', 'Arabic (RTL)', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Arabic (RTL)</div>
                   <div onclick="selectCustomOption('editPubLanguage', 'Urdu', 'Urdu (RTL)', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Urdu (RTL)</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Status *</label>
+              <div class="relative">
+                <input type="hidden" id="editPubStatus" value="Ongoing">
+                <button type="button" onclick="toggleCustomDropdown(event, 'editStatusMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                  <span id="editPubStatusLabel">Ongoing</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                </button>
+                <div id="editStatusMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                  <div onclick="selectCustomOption('editPubStatus', 'Ongoing', 'Ongoing', 'editPubStatusLabel', 'editStatusMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Ongoing</div>
+                  <div onclick="selectCustomOption('editPubStatus', 'Completed', 'Completed', 'editPubStatusLabel', 'editStatusMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Completed</div>
                 </div>
               </div>
             </div>
@@ -907,6 +940,7 @@
         authorId: "auth_astrid",
         genre: "Sci-Fi",
         language: "English",
+        status: "Ongoing",
         coverUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
         description: "In a galaxy governed by ancient ink-magic and star-smiths, a renegade scribe discovers a spell that can rewrite destiny itself.",
         views: 28400,
@@ -929,6 +963,7 @@
         authorId: "auth_damian",
         genre: "Fantasy",
         language: "English",
+        status: "Completed",
         coverUrl: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=600&q=80",
         description: "An exiled potion-maker uncovers a royal conspiracy brewing inside the forbidden alchemy tower of Eldoria.",
         views: 19200,
@@ -949,6 +984,7 @@
         authorId: "auth_sophia",
         genre: "Romance",
         language: "English",
+        status: "Ongoing",
         coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
         description: "A chance encounter at a Parisian masquerade ball sets off an unforgettable summer romance between two rival art restorers.",
         views: 31500,
@@ -969,6 +1005,7 @@
         authorId: "auth_victor",
         genre: "Horror",
         language: "English",
+        status: "Completed",
         coverUrl: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80",
         description: "An abandoned ocean lighthouse begins transmitting radio signals forty years after its entire crew mysteriously vanished.",
         views: 11400,
@@ -1222,6 +1259,9 @@
       
       // Update Language custom select
       selectCustomOption('editPubLanguage', novel.language || 'English', novel.language || 'English', 'editPubLanguageLabel', 'editLangMenu');
+
+      // Update Status custom select
+      selectCustomOption('editPubStatus', novel.status || 'Ongoing', novel.status || 'Ongoing', 'editPubStatusLabel', 'editStatusMenu');
       
       document.getElementById('editPubDesc').value = novel.description || '';
       
@@ -1280,6 +1320,7 @@
       const title = document.getElementById('editPubTitle').value.trim();
       const genre = document.getElementById('editPubGenre').value;
       const language = document.getElementById('editPubLanguage').value;
+      const status = document.getElementById('editPubStatus').value;
       const description = document.getElementById('editPubDesc').value.trim();
       const coverUrl = window.currentEditCoverBase64;
 
@@ -1289,6 +1330,7 @@
           title: title,
           genre: genre,
           language: language,
+          status: status,
           description: description,
           coverUrl: coverUrl,
           updatedAt: Date.now()
@@ -1370,6 +1412,7 @@
         title: title,
         genre: document.getElementById('pubGenre').value,
         language: document.getElementById('pubLanguage').value,
+        status: document.getElementById('pubStatus').value,
         coverUrl: window.currentUploadedCoverBase64 || '',
         description: document.getElementById('pubDesc').value.trim(),
         chapNum: parseInt(document.getElementById('pubChapNum').value) || 1,
@@ -1406,7 +1449,7 @@
           <div class="space-y-1">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">Draft</span>
             <h3 class="text-base font-bold text-white">${d.title}</h3>
-            <p class="text-xs text-gray-400">Genre: ${d.genre} • Saved on ${d.savedAt}</p>
+            <p class="text-xs text-gray-400">Genre: ${d.genre} • Status: ${d.status || 'Ongoing'} • Saved on ${d.savedAt}</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="loadDraft('${d.id}')" class="px-4 py-2 rounded-xl bg-ink-600 hover:bg-ink-500 text-white font-bold text-xs transition">
@@ -1428,6 +1471,7 @@
       document.getElementById('pubTitle').value = d.title;
       selectCustomOption('pubGenre', d.genre, d.genre, 'pubGenreLabel', 'pubGenreMenu');
       selectCustomOption('pubLanguage', d.language, d.language, 'pubLanguageLabel', 'pubLanguageMenu');
+      selectCustomOption('pubStatus', d.status || 'Ongoing', d.status || 'Ongoing', 'pubStatusLabel', 'pubStatusMenu');
       document.getElementById('pubDesc').value = d.description;
       document.getElementById('pubChapNum').value = d.chapNum;
       document.getElementById('pubChapTitle').value = d.chapTitle;
@@ -1493,6 +1537,44 @@
       renderHomeNovels();
     };
 
+    // Reusable Novel Card HTML Generator (Includes Chapter Count & Status Badge)
+    window.renderNovelCardHTML = function(novel) {
+      const chaptersCount = novel.chapters ? novel.chapters.length : 0;
+      const status = novel.status || 'Ongoing';
+      const statusBg = status === 'Completed' 
+        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+        : 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+
+      return `
+        <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition duration-300">
+          <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
+            <img src="${novel.coverUrl || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=600&q=80'}" 
+              alt="${novel.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-ink-950/90 backdrop-blur-md text-ink-400 border border-ink-800">
+              ${novel.genre}
+            </span>
+            <span class="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold backdrop-blur-md border ${statusBg}">
+              ${status}
+            </span>
+          </div>
+
+          <h3 class="text-sm font-bold text-gray-100 group-hover:text-ink-400 transition line-clamp-1 mt-1">
+            ${novel.title}
+          </h3>
+
+          <p class="text-xs text-gray-400 line-clamp-1">
+            <i class="fa-solid fa-pen-nib text-[10px] me-1 text-purple-400"></i>${novel.author}
+          </p>
+
+          <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-ink-900">
+            <span title="Chapters"><i class="fa-solid fa-list-ul me-1 text-indigo-400"></i>${chaptersCount} Ch</span>
+            <span title="Reads"><i class="fa-solid fa-eye me-1 text-ink-400"></i>${formatNumber(novel.views)}</span>
+            <span title="Comments"><i class="fa-solid fa-comments me-1 text-emerald-400"></i>${novel.comments ? novel.comments.length : 0}</span>
+          </div>
+        </div>
+      `;
+    };
+
     // Render Homepage Novels Grid
     window.renderHomeNovels = function() {
       const grid = document.getElementById('novelsGrid');
@@ -1522,30 +1604,7 @@
       }
       if (noMsg) noMsg.classList.add('hidden');
 
-      grid.innerHTML = filtered.map(novel => `
-        <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition duration-300">
-          <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
-            <img src="${novel.coverUrl || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=600&q=80'}" 
-              alt="${novel.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-ink-950/90 backdrop-blur-md text-ink-400 border border-ink-800">
-              ${novel.genre}
-            </span>
-          </div>
-
-          <h3 class="text-sm font-bold text-gray-100 group-hover:text-ink-400 transition line-clamp-1 mt-1">
-            ${novel.title}
-          </h3>
-
-          <p class="text-xs text-gray-400 line-clamp-1">
-            <i class="fa-solid fa-pen-nib text-[10px] me-1 text-purple-400"></i>${novel.author}
-          </p>
-
-          <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-ink-900">
-            <span><i class="fa-solid fa-eye me-1 text-ink-400"></i>${formatNumber(novel.views)}</span>
-            <span><i class="fa-solid fa-comments me-1 text-emerald-400"></i>${novel.comments ? novel.comments.length : 0}</span>
-          </div>
-        </div>
-      `).join('');
+      grid.innerHTML = filtered.map(novel => window.renderNovelCardHTML(novel)).join('');
     };
 
     function updateHeroBanner() {
@@ -1582,6 +1641,16 @@
       document.getElementById('detailCover').src = novel.coverUrl;
       document.getElementById('detailGenre').innerText = novel.genre;
       document.getElementById('detailLanguage').innerText = novel.language || 'English';
+      
+      const status = novel.status || 'Ongoing';
+      const statusBadge = document.getElementById('detailStatusBadge');
+      if (statusBadge) {
+        statusBadge.innerText = status;
+        statusBadge.className = status === 'Completed' 
+          ? "px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/25 text-emerald-400 border border-emerald-500/30"
+          : "px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/25 text-purple-400 border border-purple-500/30";
+      }
+
       document.getElementById('detailTitle').innerText = novel.title;
       document.getElementById('detailAuthorBtn').innerText = novel.author;
       document.getElementById('detailViews').innerText = formatNumber(novel.views);
@@ -1796,15 +1865,7 @@
       }
 
       if (emptyMsg) emptyMsg.classList.add('hidden');
-      grid.innerHTML = savedNovels.map(novel => `
-        <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition">
-          <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
-            <img src="${novel.coverUrl}" alt="${novel.title}" class="w-full h-full object-cover">
-          </div>
-          <h3 class="text-sm font-bold text-gray-100 line-clamp-1 mt-1">${novel.title}</h3>
-          <p class="text-xs text-gray-400">${novel.author}</p>
-        </div>
-      `).join('');
+      grid.innerHTML = savedNovels.map(novel => window.renderNovelCardHTML(novel)).join('');
     };
 
     // Author Profile Views
@@ -1880,14 +1941,7 @@
       const grid = document.getElementById('authorNovelsGrid');
       
       if (grid) {
-        grid.innerHTML = authorNovels.map(novel => `
-          <div onclick="openBookDetail('${novel.id}')" class="group cursor-pointer flex flex-col space-y-2 bg-ink-950/40 p-2.5 rounded-2xl border border-ink-900 hover:border-ink-600/60 transition">
-            <div class="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md">
-              <img src="${novel.coverUrl}" alt="${novel.title}" class="w-full h-full object-cover">
-            </div>
-            <h3 class="text-sm font-bold text-gray-100 line-clamp-1 mt-1">${novel.title}</h3>
-          </div>
-        `).join('');
+        grid.innerHTML = authorNovels.map(novel => window.renderNovelCardHTML(novel)).join('');
       }
 
       showTab('author');
@@ -2030,6 +2084,7 @@
       const title = document.getElementById('pubTitle').value.trim();
       const genre = document.getElementById('pubGenre').value;
       const language = document.getElementById('pubLanguage').value;
+      const status = document.getElementById('pubStatus').value;
       const coverUrl = window.currentUploadedCoverBase64 || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
       const description = document.getElementById('pubDesc').value.trim();
       
@@ -2045,6 +2100,7 @@
         authorId: window.currentUser.uid,
         genre: genre,
         language: language,
+        status: status,
         coverUrl: coverUrl,
         description: description,
         views: 1,
