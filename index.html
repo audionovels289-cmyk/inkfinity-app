@@ -44,10 +44,22 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
+    /* Themed Select Dropdowns to fix white box issue */
+    select {
+      background-color: #0b0f19 !important;
+      color: #f3f4f6 !important;
+      border-color: #1e293b !important;
+    }
+    
     /* Sepia Theme Override */
     .theme-sepia {
       background-color: #f4ecd8 !important;
       color: #4a3b2a !important;
+    }
+    .theme-sepia select {
+      background-color: #ebdcb9 !important;
+      color: #3d2f20 !important;
+      border-color: #d8c49d !important;
     }
     .theme-sepia .reader-card {
       background-color: #ebdcb9 !important;
@@ -62,6 +74,11 @@
     .theme-light {
       background-color: #f8fafc !important;
       color: #0f172a !important;
+    }
+    .theme-light select {
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+      border-color: #cbd5e1 !important;
     }
     .theme-light .reader-card {
       background-color: #ffffff !important;
@@ -153,7 +170,7 @@
     <!-- 1. HOMEPAGE TAB -->
     <section id="tab-home" class="space-y-8">
       
-      <!-- Featured Banner (Most Viewed Novel) -->
+      <!-- Featured Banner (Most Viewed Masterpiece) -->
       <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-ink-950 via-purple-950 to-[#0b0f19] border border-ink-700/30 p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
         <div class="space-y-4 max-w-xl text-center md:text-left z-10">
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-ink-500/20 text-ink-400 border border-ink-500/30">
@@ -409,30 +426,178 @@
       </div>
     </section>
 
-    <!-- 5. WRITER STUDIO (PUBLISH / DRAFT) -->
+    <!-- 5. WRITER STUDIO (PUBLISH / DRAFT / ADD CHAPTER / EDIT NOVEL) -->
     <section id="tab-publish" class="hidden space-y-8 max-w-3xl mx-auto">
       <div class="border-b border-ink-900 pb-4">
         <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
           <i class="fa-solid fa-feather-pointed text-ink-500"></i> Writer Studio
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Publish new web novels, add chapters, or save drafts for later editing.</p>
+        <p class="text-xs text-gray-400 mt-1">Publish new web novels, add chapters, edit your books, or manage drafts.</p>
       </div>
 
-      <form id="publishForm" onsubmit="handlePublishStory(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
-        
-        <div class="space-y-4">
-          <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Story Settings</h3>
-          
+      <!-- Studio Mode Navigation Tabs -->
+      <div class="flex bg-ink-950 p-1.5 rounded-2xl border border-ink-900 text-xs font-bold">
+        <button onclick="switchStudioTab('publish')" id="studiotab-publish" class="flex-1 py-2.5 rounded-xl text-white bg-ink-600 shadow-md transition">Publish New Novel</button>
+        <button onclick="switchStudioTab('chapter')" id="studiotab-chapter" class="flex-1 py-2.5 rounded-xl text-gray-400 hover:text-white transition">Add New Chapter</button>
+        <button onclick="switchStudioTab('edit')" id="studiotab-edit" class="flex-1 py-2.5 rounded-xl text-gray-400 hover:text-white transition">Edit Novel Details</button>
+        <button onclick="switchStudioTab('drafts')" id="studiotab-drafts" class="flex-1 py-2.5 rounded-xl text-gray-400 hover:text-white transition">Saved Drafts (<span id="draftsCountBadge">0</span>)</button>
+      </div>
+
+      <!-- SUB-TAB 1: PUBLISH NEW NOVEL -->
+      <div id="studio-panel-publish" class="space-y-6">
+        <form id="publishForm" onsubmit="handlePublishStory(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
+          <div class="space-y-4">
+            <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Story Settings</h3>
+            
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Novel Title *</label>
+              <input type="text" id="pubTitle" required placeholder="e.g. Whispers of the Void" 
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
+                <select id="pubGenre" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
+                  <option value="Romance">Romance</option>
+                  <option value="Thriller">Thriller</option>
+                  <option value="Mystery">Mystery</option>
+                  <option value="Horror">Horror</option>
+                  <option value="Fantasy">Fantasy</option>
+                  <option value="Sci-Fi">Sci-Fi</option>
+                  <option value="Drama">Drama</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1">Language *</label>
+                <select id="pubLanguage" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                  <option value="Arabic">Arabic (RTL)</option>
+                  <option value="Urdu">Urdu (RTL)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Upload Book Cover from Gallery</label>
+              <div class="flex items-center gap-4">
+                <label class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink-950 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
+                  <i class="fa-solid fa-image text-ink-400 text-base"></i>
+                  <span id="pubCoverFileName">Choose image from device...</span>
+                  <input type="file" id="pubCoverFile" accept="image/*" onchange="handleCoverFileSelect(event)" class="hidden">
+                </label>
+                <div id="pubCoverPreviewContainer" class="w-12 h-16 rounded-lg bg-ink-900 border border-ink-800 overflow-hidden shrink-0 hidden">
+                  <img id="pubCoverPreview" src="" class="w-full h-full object-cover">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Short Book Synopsis *</label>
+              <textarea id="pubDesc" rows="3" required placeholder="Summarize your story plot to intrigue readers..." 
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 p-3.5 text-sm text-white focus:outline-none focus:border-ink-500"></textarea>
+            </div>
+          </div>
+
+          <hr class="border-ink-900">
+
+          <!-- Initial Chapter Section -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Chapter 1 Content</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter #</label>
+                <input type="number" id="pubChapNum" value="1" min="1" 
+                  class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Title *</label>
+                <input type="text" id="pubChapTitle" required placeholder="e.g. Chapter 1: The Awakening" 
+                  class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Body *</label>
+              <textarea id="pubChapContent" rows="8" required placeholder="Write or paste your story text here..." 
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 p-4 text-sm text-white focus:outline-none focus:border-ink-500 leading-relaxed font-serif-reading"></textarea>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end gap-4 pt-2">
+            <button type="button" onclick="saveAsDraft()" class="px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-sm font-semibold text-gray-200 transition">
+              Save as Draft
+            </button>
+            <button type="submit" class="px-8 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-bold text-white shadow-lg shadow-ink-600/30 transition">
+              Publish Story Now
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SUB-TAB 2: ADD NEW CHAPTER TO EXISTING NOVEL -->
+      <div id="studio-panel-chapter" class="hidden space-y-6">
+        <form onsubmit="handleAddChapter(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Select Your Novel *</label>
+            <select id="addChapNovelId" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
+              <!-- Populated dynamically with author's novels -->
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter # *</label>
+              <input type="number" id="addChapNum" min="1" required placeholder="2"
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Title *</label>
+              <input type="text" id="addChapTitle" required placeholder="e.g. Chapter 2: Shadows Deepen"
+                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Body *</label>
+            <textarea id="addChapContent" rows="10" required placeholder="Write or paste the new chapter contents here..."
+              class="w-full rounded-xl bg-ink-950 border border-ink-800 p-4 text-sm text-white focus:outline-none focus:border-ink-500 leading-relaxed font-serif-reading"></textarea>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="px-8 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-bold text-white shadow-lg shadow-ink-600/30 transition">
+              Publish New Chapter
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SUB-TAB 3: EDIT NOVEL DETAILS -->
+      <div id="studio-panel-edit" class="hidden space-y-6">
+        <form onsubmit="handleEditNovel(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Select Novel to Edit *</label>
+            <select id="editNovelSelectId" onchange="loadNovelDataForEditing(this.value)" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
           <div>
             <label class="block text-xs font-semibold text-gray-300 mb-1">Novel Title *</label>
-            <input type="text" id="pubTitle" required placeholder="e.g. Whispers of the Void" 
+            <input type="text" id="editPubTitle" required
               class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
-              <select id="pubGenre" required class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+              <select id="editPubGenre" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
                 <option value="Romance">Romance</option>
                 <option value="Thriller">Thriller</option>
                 <option value="Mystery">Mystery</option>
@@ -442,10 +607,9 @@
                 <option value="Drama">Drama</option>
               </select>
             </div>
-
             <div>
               <label class="block text-xs font-semibold text-gray-300 mb-1">Language *</label>
-              <select id="pubLanguage" required class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
+              <select id="editPubLanguage" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
                 <option value="English">English</option>
                 <option value="Spanish">Spanish</option>
                 <option value="French">French</option>
@@ -456,64 +620,43 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">Upload Book Cover from Gallery</label>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Update Cover Image</label>
             <div class="flex items-center gap-4">
               <label class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink-950 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
                 <i class="fa-solid fa-image text-ink-400 text-base"></i>
-                <span id="pubCoverFileName">Choose image from device...</span>
-                <input type="file" id="pubCoverFile" accept="image/*" onchange="handleCoverFileSelect(event)" class="hidden">
+                <span id="editCoverFileName">Choose new cover image...</span>
+                <input type="file" id="editCoverFile" accept="image/*" onchange="handleEditCoverFileSelect(event)" class="hidden">
               </label>
-              <div id="pubCoverPreviewContainer" class="w-12 h-16 rounded-lg bg-ink-900 border border-ink-800 overflow-hidden shrink-0 hidden">
-                <img id="pubCoverPreview" src="" class="w-full h-full object-cover">
+              <div class="w-12 h-16 rounded-lg bg-ink-900 border border-ink-800 overflow-hidden shrink-0">
+                <img id="editCoverPreview" src="" class="w-full h-full object-cover">
               </div>
             </div>
-            <p class="text-[11px] text-gray-500 mt-1">Select PNG, JPG, or WEBP. Automatically resized and compressed for fast cloud sync.</p>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">Short Book Synopsis *</label>
-            <textarea id="pubDesc" rows="3" required placeholder="Summarize your story plot to intrigue readers..." 
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Book Synopsis *</label>
+            <textarea id="editPubDesc" rows="3" required
               class="w-full rounded-xl bg-ink-950 border border-ink-800 p-3.5 text-sm text-white focus:outline-none focus:border-ink-500"></textarea>
           </div>
-        </div>
 
-        <hr class="border-ink-900">
-
-        <!-- Initial Chapter Section -->
-        <div class="space-y-4">
-          <h3 class="text-xs font-extrabold text-ink-400 uppercase tracking-wider">Chapter 1 Content</h3>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter #</label>
-              <input type="number" id="pubChapNum" value="1" min="1" 
-                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
-            </div>
-
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Title *</label>
-              <input type="text" id="pubChapTitle" required placeholder="e.g. Chapter 1: The Awakening" 
-                class="w-full rounded-xl bg-ink-950 border border-ink-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ink-500">
-            </div>
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="px-8 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-bold text-white shadow-lg shadow-ink-600/30 transition">
+              Save Novel Changes
+            </button>
           </div>
+        </form>
+      </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">Chapter Body *</label>
-            <textarea id="pubChapContent" rows="8" required placeholder="Write or paste your story text here..." 
-              class="w-full rounded-xl bg-ink-950 border border-ink-800 p-4 text-sm text-white focus:outline-none focus:border-ink-500 leading-relaxed font-serif-reading"></textarea>
-          </div>
+      <!-- SUB-TAB 4: SAVED DRAFTS -->
+      <div id="studio-panel-drafts" class="hidden space-y-4">
+        <div id="draftsListContainer" class="space-y-4">
+          <!-- Populated dynamically -->
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-end gap-4 pt-2">
-          <button type="button" onclick="saveAsDraft()" class="px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-sm font-semibold text-gray-200 transition">
-            Save as Draft
-          </button>
-          <button type="submit" class="px-8 py-3 rounded-full bg-gradient-to-r from-ink-600 to-purple-600 hover:opacity-95 text-sm font-bold text-white shadow-lg shadow-ink-600/30 transition">
-            Publish Story Now
-          </button>
+        <div id="emptyDraftsMsg" class="hidden text-center py-16 bg-ink-950/40 rounded-3xl border border-ink-900 space-y-3">
+          <i class="fa-solid fa-file-pen text-4xl text-gray-600"></i>
+          <p class="text-gray-400 font-medium">You have no saved drafts.</p>
         </div>
-      </form>
+      </div>
     </section>
 
     <!-- 6. BOOKMARKS LIBRARY -->
@@ -802,6 +945,7 @@
     window.readerDirection = "ltr";
     window.currentUploadedAvatarBase64 = "";
     window.currentUploadedCoverBase64 = "";
+    window.currentEditCoverBase64 = "";
 
     // Initialize Firestore Data Sync & Auth State Listeners
     window.addEventListener('DOMContentLoaded', async () => {
@@ -834,6 +978,9 @@
           if (window.currentBookId) {
             openBookDetail(window.currentBookId, true);
           }
+          if (window.currentUser) {
+            populateAuthorNovelsSelects();
+          }
         }
       });
 
@@ -863,6 +1010,8 @@
           window.currentUser = null;
         }
         renderAuthUI();
+        populateAuthorNovelsSelects();
+        renderDraftsList();
       });
     });
 
@@ -915,6 +1064,289 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       if (tabName === 'library') renderLibrary();
+      if (tabName === 'publish') {
+        populateAuthorNovelsSelects();
+        renderDraftsList();
+      }
+    };
+
+    // Studio Sub-Tab switcher
+    window.switchStudioTab = function(subName) {
+      const subTabs = ['publish', 'chapter', 'edit', 'drafts'];
+      subTabs.forEach(s => {
+        const panel = document.getElementById(`studio-panel-${s}`);
+        const btn = document.getElementById(`studiotab-${s}`);
+        if (panel) panel.classList.add('hidden');
+        if (btn) btn.className = "flex-1 py-2.5 rounded-xl text-gray-400 hover:text-white transition";
+      });
+
+      const activePanel = document.getElementById(`studio-panel-${subName}`);
+      const activeBtn = document.getElementById(`studiotab-${subName}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+      if (activeBtn) activeBtn.className = "flex-1 py-2.5 rounded-xl text-white bg-ink-600 shadow-md transition";
+
+      if (subName === 'drafts') renderDraftsList();
+    };
+
+    // Populate Author's Novels in Studio Select Dropdowns
+    window.populateAuthorNovelsSelects = function() {
+      if (!window.currentUser) return;
+      const myNovels = window.novelsData.filter(n => n.authorId === window.currentUser.uid || n.author === window.currentUser.name);
+
+      const addChapSelect = document.getElementById('addChapNovelId');
+      const editSelect = document.getElementById('editNovelSelectId');
+
+      const optionsHTML = myNovels.length > 0 
+        ? myNovels.map(n => `<option value="${n.id}">${n.title} (${n.chapters ? n.chapters.length : 0} Chapters)</option>`).join('')
+        : `<option value="">You haven't published any novels yet</option>`;
+
+      if (addChapSelect) addChapSelect.innerHTML = optionsHTML;
+      if (editSelect) {
+        editSelect.innerHTML = `<option value="">-- Select a novel to edit --</option>` + optionsHTML;
+      }
+      if (myNovels.length > 0 && editSelect && editSelect.value === "") {
+        editSelect.value = myNovels[0].id;
+        loadNovelDataForEditing(myNovels[0].id);
+      }
+    };
+
+    // Load Novel Data into Edit Form
+    window.loadNovelDataForEditing = function(novelId) {
+      if (!novelId) return;
+      const novel = window.novelsData.find(n => n.id === novelId);
+      if (!novel) return;
+
+      document.getElementById('editPubTitle').value = novel.title || '';
+      document.getElementById('editPubGenre').value = novel.genre || 'Romance';
+      document.getElementById('editPubLanguage').value = novel.language || 'English';
+      document.getElementById('editPubDesc').value = novel.description || '';
+      
+      const previewImg = document.getElementById('editCoverPreview');
+      if (previewImg) previewImg.src = novel.coverUrl || '';
+      window.currentEditCoverBase64 = novel.coverUrl || '';
+    };
+
+    window.handleEditCoverFileSelect = function(event) {
+      const file = event.target.files[0];
+      const fileNameEl = document.getElementById('editCoverFileName');
+      const previewImg = document.getElementById('editCoverPreview');
+
+      if (file) {
+        if (fileNameEl) fileNameEl.innerText = file.name;
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 600;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            window.currentEditCoverBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            if (previewImg) previewImg.src = window.currentEditCoverBase64;
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.handleEditNovel = async function(e) {
+      e.preventDefault();
+      if (!window.currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const novelId = document.getElementById('editNovelSelectId').value;
+      if (!novelId) {
+        showToast('Please select a valid novel to edit.');
+        return;
+      }
+
+      const title = document.getElementById('editPubTitle').value.trim();
+      const genre = document.getElementById('editPubGenre').value;
+      const language = document.getElementById('editPubLanguage').value;
+      const description = document.getElementById('editPubDesc').value.trim();
+      const coverUrl = window.currentEditCoverBase64;
+
+      try {
+        const bookRef = doc(db, "novels", novelId);
+        await updateDoc(bookRef, {
+          title: title,
+          genre: genre,
+          language: language,
+          description: description,
+          coverUrl: coverUrl,
+          updatedAt: Date.now()
+        });
+
+        showToast('Novel details updated successfully!');
+        renderHomeNovels();
+      } catch (err) {
+        console.error("Error editing novel:", err);
+        showToast('Failed to update novel.');
+      }
+    };
+
+    // Add New Chapter Handler
+    window.handleAddChapter = async function(e) {
+      e.preventDefault();
+      if (!window.currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const novelId = document.getElementById('addChapNovelId').value;
+      if (!novelId) {
+        showToast('Please select a novel first.');
+        return;
+      }
+
+      const chapNum = parseInt(document.getElementById('addChapNum').value) || 1;
+      const chapTitle = document.getElementById('addChapTitle').value.trim();
+      const chapContent = document.getElementById('addChapContent').value.trim();
+
+      const newChapter = {
+        number: chapNum,
+        title: chapTitle,
+        content: chapContent
+      };
+
+      try {
+        const bookRef = doc(db, "novels", novelId);
+        await updateDoc(bookRef, {
+          chapters: arrayUnion(newChapter),
+          updatedAt: Date.now()
+        });
+
+        document.getElementById('addChapTitle').value = '';
+        document.getElementById('addChapContent').value = '';
+        document.getElementById('addChapNum').value = '';
+
+        showToast('New chapter published successfully!');
+        openBookDetail(novelId);
+      } catch (err) {
+        console.error("Error adding chapter:", err);
+        showToast('Failed to add chapter.');
+      }
+    };
+
+    // Drafts Management (Local Storage)
+    function getDrafts() {
+      try {
+        return JSON.parse(localStorage.getItem('inkfinity_drafts') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveDraftsList(drafts) {
+      localStorage.setItem('inkfinity_drafts', JSON.stringify(drafts));
+    }
+
+    window.saveAsDraft = function() {
+      const title = document.getElementById('pubTitle').value.trim();
+      if (!title) {
+        showToast('Please enter at least a novel title to save draft.');
+        return;
+      }
+
+      const draft = {
+        id: 'draft_' + Date.now(),
+        title: title,
+        genre: document.getElementById('pubGenre').value,
+        language: document.getElementById('pubLanguage').value,
+        coverUrl: window.currentUploadedCoverBase64 || '',
+        description: document.getElementById('pubDesc').value.trim(),
+        chapNum: parseInt(document.getElementById('pubChapNum').value) || 1,
+        chapTitle: document.getElementById('pubChapTitle').value.trim(),
+        chapContent: document.getElementById('pubChapContent').value.trim(),
+        savedAt: new Date().toLocaleDateString()
+      };
+
+      let drafts = getDrafts();
+      drafts.unshift(draft);
+      saveDraftsList(drafts);
+      renderDraftsList();
+      showToast('Draft Saved Successfully!');
+    };
+
+    window.renderDraftsList = function() {
+      const container = document.getElementById('draftsListContainer');
+      const emptyMsg = document.getElementById('emptyDraftsMsg');
+      const badge = document.getElementById('draftsCountBadge');
+      const drafts = getDrafts();
+
+      if (badge) badge.innerText = drafts.length;
+      if (!container) return;
+
+      if (drafts.length === 0) {
+        container.innerHTML = '';
+        if (emptyMsg) emptyMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyMsg) emptyMsg.classList.add('hidden');
+      container.innerHTML = drafts.map(d => `
+        <div class="bg-ink-950/60 p-5 rounded-2xl border border-ink-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">Draft</span>
+            <h3 class="text-base font-bold text-white">${d.title}</h3>
+            <p class="text-xs text-gray-400">Genre: ${d.genre} • Saved on ${d.savedAt}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="loadDraft('${d.id}')" class="px-4 py-2 rounded-xl bg-ink-600 hover:bg-ink-500 text-white font-bold text-xs transition">
+              Resume & Publish
+            </button>
+            <button onclick="deleteDraft('${d.id}')" class="p-2.5 rounded-xl bg-ink-900 hover:bg-rose-900/40 text-gray-400 hover:text-rose-400 text-xs transition">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    window.loadDraft = function(draftId) {
+      const drafts = getDrafts();
+      const d = drafts.find(x => x.id === draftId);
+      if (!d) return;
+
+      document.getElementById('pubTitle').value = d.title;
+      document.getElementById('pubGenre').value = d.genre;
+      document.getElementById('pubLanguage').value = d.language;
+      document.getElementById('pubDesc').value = d.description;
+      document.getElementById('pubChapNum').value = d.chapNum;
+      document.getElementById('pubChapTitle').value = d.chapTitle;
+      document.getElementById('pubChapContent').value = d.chapContent;
+
+      if (d.coverUrl) {
+        window.currentUploadedCoverBase64 = d.coverUrl;
+        const previewImg = document.getElementById('pubCoverPreview');
+        const previewContainer = document.getElementById('pubCoverPreviewContainer');
+        if (previewImg) previewImg.src = d.coverUrl;
+        if (previewContainer) previewContainer.classList.remove('hidden');
+      }
+
+      switchStudioTab('publish');
+      showToast('Draft loaded into publisher!');
+    };
+
+    window.deleteDraft = function(draftId) {
+      let drafts = getDrafts();
+      drafts = drafts.filter(x => x.id !== draftId);
+      saveDraftsList(drafts);
+      renderDraftsList();
+      showToast('Draft deleted');
     };
 
     // Genre Bar Filtering
@@ -1014,7 +1446,6 @@
 
     function updateHeroBanner() {
       if (window.novelsData.length > 0) {
-        // Find the novel with the highest views for the top banner
         const mostViewed = [...window.novelsData].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
 
         const titleEl = document.getElementById('heroTitle');
@@ -1029,7 +1460,6 @@
         if (viewsEl) viewsEl.innerText = formatNumber(mostViewed.views);
         if (coverEl) coverEl.src = mostViewed.coverUrl;
         
-        // Save ID for banner button click
         window.heroBookId = mostViewed.id;
       }
     }
@@ -1092,7 +1522,6 @@
       const novel = window.novelsData.find(n => n.id === bookId);
       if (!novel || !novel.chapters || !novel.chapters[chapIdx]) return;
 
-      // Increment view count in Firestore
       try {
         const bookRef = doc(db, "novels", bookId);
         await updateDoc(bookRef, {
@@ -1214,7 +1643,7 @@
       }
     };
 
-    // Bookmarking (Local Bookmarks or Cloud)
+    // Bookmarking
     function getBookmarks() {
       try {
         return JSON.parse(localStorage.getItem('inkfinity_bookmarks') || '[]');
@@ -1324,39 +1753,22 @@
         else editBtn.classList.add('hidden');
       }
 
-      // Render Multi-Social Links
       const socialsEl = document.getElementById('authorSocials');
       if (socialsEl) {
-        const socials = activeProfile?.socials || {
-          facebook: '', instagram: '', twitter: '', website: ''
-        };
-
+        const socials = activeProfile?.socials || { facebook: '', instagram: '', twitter: '', website: '' };
         let socialBadgesHTML = '';
         if (socials.facebook) {
-          socialBadgesHTML += `
-            <a href="${socials.facebook}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-semibold hover:bg-blue-600 hover:text-white transition flex items-center gap-1.5">
-              <i class="fa-brands fa-facebook"></i> Facebook
-            </a>`;
+          socialBadgesHTML += `<a href="${socials.facebook}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-semibold hover:bg-blue-600 hover:text-white transition flex items-center gap-1.5"><i class="fa-brands fa-facebook"></i> Facebook</a>`;
         }
         if (socials.instagram) {
-          socialBadgesHTML += `
-            <a href="${socials.instagram}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-pink-600/20 text-pink-400 border border-pink-500/30 text-xs font-semibold hover:bg-pink-600 hover:text-white transition flex items-center gap-1.5">
-              <i class="fa-brands fa-instagram"></i> Instagram
-            </a>`;
+          socialBadgesHTML += `<a href="${socials.instagram}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-pink-600/20 text-pink-400 border border-pink-500/30 text-xs font-semibold hover:bg-pink-600 hover:text-white transition flex items-center gap-1.5"><i class="fa-brands fa-instagram"></i> Instagram</a>`;
         }
         if (socials.twitter) {
-          socialBadgesHTML += `
-            <a href="${socials.twitter}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-gray-700/30 text-gray-300 border border-gray-600/30 text-xs font-semibold hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5">
-              <i class="fa-brands fa-x-twitter"></i> Twitter / X
-            </a>`;
+          socialBadgesHTML += `<a href="${socials.twitter}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-gray-700/30 text-gray-300 border border-gray-600/30 text-xs font-semibold hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5"><i class="fa-brands fa-x-twitter"></i> Twitter / X</a>`;
         }
         if (socials.website) {
-          socialBadgesHTML += `
-            <a href="${socials.website}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-600 hover:text-white transition flex items-center gap-1.5">
-              <i class="fa-solid fa-globe"></i> Website
-            </a>`;
+          socialBadgesHTML += `<a href="${socials.website}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-600 hover:text-white transition flex items-center gap-1.5"><i class="fa-solid fa-globe"></i> Website</a>`;
         }
-
         socialsEl.innerHTML = socialBadgesHTML || `<span class="text-xs text-gray-500 italic">No social links provided.</span>`;
       }
 
@@ -1377,7 +1789,7 @@
       showTab('author');
     };
 
-    // Avatar File Picker with Compression
+    // Avatar File Picker
     window.handleAvatarFileSelect = function(event) {
       const file = event.target.files[0];
       const fileNameEl = document.getElementById('editAvatarFileName');
@@ -1411,7 +1823,6 @@
       }
     };
 
-    // Edit Profile Modal logic
     window.toggleEditProfileModal = function() {
       const modal = document.getElementById('profileEditModal');
       if (!modal) return;
@@ -1465,7 +1876,7 @@
       }
     };
 
-    // Writer Studio Publishing & Cover Compression
+    // Cover File Picker
     window.handleCoverFileSelect = function(event) {
       const file = event.target.files[0];
       const fileNameEl = document.getElementById('pubCoverFileName');
@@ -1486,15 +1897,9 @@
             let height = img.height;
 
             if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
-              }
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
             } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
-              }
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
             }
             canvas.width = width;
             canvas.height = height;
@@ -1507,10 +1912,6 @@
           };
         };
         reader.readAsDataURL(file);
-      } else {
-        window.currentUploadedCoverBase64 = "";
-        if (fileNameEl) fileNameEl.innerText = "Choose image from device...";
-        if (previewContainer) previewContainer.classList.add('hidden');
       }
     };
 
@@ -1563,15 +1964,12 @@
         
         window.novelsData.unshift(newNovel);
         renderHomeNovels();
+        populateAuthorNovelsSelects();
         openBookDetail(newNovelId);
       } catch (err) {
         console.error("Error publishing novel:", err);
         showToast('Failed to publish novel: ' + err.message);
       }
-    };
-
-    window.saveAsDraft = function() {
-      showToast('Draft Saved Locally');
     };
 
     window.shareBook = function() {
@@ -1702,7 +2100,6 @@
       }
     };
 
-    // Toast Helper
     window.showToast = function(msg) {
       const toast = document.getElementById('toast');
       const msgEl = document.getElementById('toastMsg');
