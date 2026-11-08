@@ -46,38 +46,21 @@
     
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    /* Dark Themed Custom Select Dropdowns Across All Forms */
-    select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
+
+    /* Custom Themed Dropdowns */
+    .custom-dropdown-menu {
       background-color: #0b0f19 !important;
-      color: #f3f4f6 !important;
-      border-color: #1e293b !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b5cf6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 1rem center !important;
-      background-size: 1.25rem !important;
-      padding-right: 2.5rem !important;
+      border: 1px solid #1e293b !important;
     }
-    
-    select option {
-      background-color: #0b0f19 !important;
-      color: #e2e8f0 !important;
-      padding: 10px;
+    .custom-dropdown-item:hover {
+      background-color: #4c1d95 !important;
+      color: #ffffff !important;
     }
     
     /* Sepia Theme Override */
     .theme-sepia {
       background-color: #f4ecd8 !important;
       color: #4a3b2a !important;
-    }
-    .theme-sepia select {
-      background-color: #ebdcb9 !important;
-      color: #3d2f20 !important;
-      border-color: #d8c49d !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234a3b2a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
     }
     .theme-sepia .reader-card {
       background-color: #ebdcb9 !important;
@@ -93,12 +76,6 @@
       background-color: #f8fafc !important;
       color: #0f172a !important;
     }
-    .theme-light select {
-      background-color: #ffffff !important;
-      color: #1e293b !important;
-      border-color: #cbd5e1 !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
-    }
     .theme-light .reader-card {
       background-color: #ffffff !important;
       color: #1e293b !important;
@@ -109,7 +86,7 @@
     }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-[#0b0f19] text-gray-100 min-h-screen flex flex-col transition-colors duration-300" onclick="closeAllCustomDropdowns(event)">
 
   <!-- ================= TOP HEADER / NAVBAR ================= -->
   <header class="sticky top-0 z-40 bg-[#0b0f19]/90 backdrop-blur-md border-b border-ink-900/50 transition-colors">
@@ -237,11 +214,19 @@
           <h2 class="text-lg font-bold text-gray-100 flex items-center gap-2">
             <i class="fa-solid fa-fire text-amber-500"></i> Trending & New Releases
           </h2>
-          <select id="sortBy" onchange="renderHomeNovels()" class="bg-ink-950 border border-ink-800 text-xs rounded-xl px-3 py-1.5 text-gray-300 focus:outline-none focus:border-ink-500">
-            <option value="updated">Recently Updated</option>
-            <option value="views">Most Reads</option>
-            <option value="title">Alphabetical</option>
-          </select>
+          <!-- Custom Sort Dropdown -->
+          <div class="relative">
+            <input type="hidden" id="sortBy" value="updated">
+            <button type="button" onclick="toggleCustomDropdown(event, 'sortDropdownMenu')" class="bg-ink-950 border border-ink-800 text-xs rounded-xl px-4 py-2 text-gray-200 flex items-center gap-3 focus:outline-none focus:border-ink-500">
+              <span id="sortByLabel">Recently Updated</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-ink-400"></i>
+            </button>
+            <div id="sortDropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+              <div onclick="selectCustomOption('sortBy', 'updated', 'Recently Updated', 'sortByLabel', 'sortDropdownMenu'); renderHomeNovels();" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Recently Updated</div>
+              <div onclick="selectCustomOption('sortBy', 'views', 'Most Reads', 'sortByLabel', 'sortDropdownMenu'); renderHomeNovels();" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Most Reads</div>
+              <div onclick="selectCustomOption('sortBy', 'title', 'Alphabetical', 'sortByLabel', 'sortDropdownMenu'); renderHomeNovels();" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Alphabetical</div>
+            </div>
+          </div>
         </div>
 
         <!-- Cards Grid -->
@@ -475,28 +460,44 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Custom Genre Dropdown -->
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
-                <select id="pubGenre" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-                  <option value="Romance">Romance</option>
-                  <option value="Thriller">Thriller</option>
-                  <option value="Mystery">Mystery</option>
-                  <option value="Horror">Horror</option>
-                  <option value="Fantasy">Fantasy</option>
-                  <option value="Sci-Fi">Sci-Fi</option>
-                  <option value="Drama">Drama</option>
-                </select>
+                <div class="relative">
+                  <input type="hidden" id="pubGenre" value="Romance">
+                  <button type="button" onclick="toggleCustomDropdown(event, 'pubGenreMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                    <span id="pubGenreLabel">Romance</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                  </button>
+                  <div id="pubGenreMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                    <div onclick="selectCustomOption('pubGenre', 'Romance', 'Romance', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Romance</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Thriller', 'Thriller', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Thriller</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Mystery', 'Mystery', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Mystery</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Horror', 'Horror', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Horror</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Fantasy', 'Fantasy', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Fantasy</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Sci-Fi', 'Sci-Fi', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Sci-Fi</div>
+                    <div onclick="selectCustomOption('pubGenre', 'Drama', 'Drama', 'pubGenreLabel', 'pubGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Drama</div>
+                  </div>
+                </div>
               </div>
 
+              <!-- Custom Language Dropdown -->
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1">Language *</label>
-                <select id="pubLanguage" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-                  <option value="English">English</option>
-                  <option value="Spanish">Spanish</option>
-                  <option value="French">French</option>
-                  <option value="Arabic">Arabic (RTL)</option>
-                  <option value="Urdu">Urdu (RTL)</option>
-                </select>
+                <div class="relative">
+                  <input type="hidden" id="pubLanguage" value="English">
+                  <button type="button" onclick="toggleCustomDropdown(event, 'pubLanguageMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                    <span id="pubLanguageLabel">English</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                  </button>
+                  <div id="pubLanguageMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                    <div onclick="selectCustomOption('pubLanguage', 'English', 'English', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">English</div>
+                    <div onclick="selectCustomOption('pubLanguage', 'Spanish', 'Spanish', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Spanish</div>
+                    <div onclick="selectCustomOption('pubLanguage', 'French', 'French', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">French</div>
+                    <div onclick="selectCustomOption('pubLanguage', 'Arabic', 'Arabic (RTL)', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Arabic (RTL)</div>
+                    <div onclick="selectCustomOption('pubLanguage', 'Urdu', 'Urdu (RTL)', 'pubLanguageLabel', 'pubLanguageMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Urdu (RTL)</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -566,9 +567,16 @@
         <form onsubmit="handleAddChapter(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
           <div>
             <label class="block text-xs font-semibold text-gray-300 mb-1">Select Your Novel *</label>
-            <select id="addChapNovelId" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-              <!-- Populated dynamically with author's novels -->
-            </select>
+            <div class="relative">
+              <input type="hidden" id="addChapNovelId" value="">
+              <button type="button" onclick="toggleCustomDropdown(event, 'addChapNovelMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                <span id="addChapNovelLabel">Select a novel...</span>
+                <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+              </button>
+              <div id="addChapNovelMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1 max-h-60 overflow-y-auto">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -603,9 +611,16 @@
         <form onsubmit="handleEditNovel(event)" class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
           <div>
             <label class="block text-xs font-semibold text-gray-300 mb-1">Select Novel to Edit *</label>
-            <select id="editNovelSelectId" onchange="loadNovelDataForEditing(this.value)" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-              <!-- Populated dynamically -->
-            </select>
+            <div class="relative">
+              <input type="hidden" id="editNovelSelectId" value="">
+              <button type="button" onclick="toggleCustomDropdown(event, 'editNovelMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                <span id="editNovelSelectLabel">Select a novel to edit...</span>
+                <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+              </button>
+              <div id="editNovelMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1 max-h-60 overflow-y-auto">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
           </div>
 
           <div>
@@ -617,25 +632,39 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
-              <select id="editPubGenre" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-                <option value="Romance">Romance</option>
-                <option value="Thriller">Thriller</option>
-                <option value="Mystery">Mystery</option>
-                <option value="Horror">Horror</option>
-                <option value="Fantasy">Fantasy</option>
-                <option value="Sci-Fi">Sci-Fi</option>
-                <option value="Drama">Drama</option>
-              </select>
+              <div class="relative">
+                <input type="hidden" id="editPubGenre" value="Romance">
+                <button type="button" onclick="toggleCustomDropdown(event, 'editGenreMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                  <span id="editPubGenreLabel">Romance</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                </button>
+                <div id="editGenreMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                  <div onclick="selectCustomOption('editPubGenre', 'Romance', 'Romance', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Romance</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Thriller', 'Thriller', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Thriller</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Mystery', 'Mystery', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Mystery</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Horror', 'Horror', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Horror</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Fantasy', 'Fantasy', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Fantasy</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Sci-Fi', 'Sci-Fi', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Sci-Fi</div>
+                  <div onclick="selectCustomOption('editPubGenre', 'Drama', 'Drama', 'editPubGenreLabel', 'editGenreMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Drama</div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-300 mb-1">Language *</label>
-              <select id="editPubLanguage" required class="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:border-ink-500">
-                <option value="English">English</option>
-                <option value="Spanish">Spanish</option>
-                <option value="French">French</option>
-                <option value="Arabic">Arabic (RTL)</option>
-                <option value="Urdu">Urdu (RTL)</option>
-              </select>
+              <div class="relative">
+                <input type="hidden" id="editPubLanguage" value="English">
+                <button type="button" onclick="toggleCustomDropdown(event, 'editLangMenu')" class="w-full bg-ink-950 border border-ink-800 rounded-xl px-4 py-2.5 text-sm text-gray-200 flex items-center justify-between focus:outline-none focus:border-ink-500">
+                  <span id="editPubLanguageLabel">English</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-ink-400"></i>
+                </button>
+                <div id="editLangMenu" class="hidden absolute left-0 right-0 mt-2 rounded-xl custom-dropdown-menu shadow-2xl z-50 overflow-hidden py-1">
+                  <div onclick="selectCustomOption('editPubLanguage', 'English', 'English', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">English</div>
+                  <div onclick="selectCustomOption('editPubLanguage', 'Spanish', 'Spanish', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Spanish</div>
+                  <div onclick="selectCustomOption('editPubLanguage', 'French', 'French', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">French</div>
+                  <div onclick="selectCustomOption('editPubLanguage', 'Arabic', 'Arabic (RTL)', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Arabic (RTL)</div>
+                  <div onclick="selectCustomOption('editPubLanguage', 'Urdu', 'Urdu (RTL)', 'editPubLanguageLabel', 'editLangMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">Urdu (RTL)</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -967,6 +996,37 @@
     window.currentUploadedCoverBase64 = "";
     window.currentEditCoverBase64 = "";
 
+    // Custom Dropdown Helper Functions
+    window.toggleCustomDropdown = function(event, menuId) {
+      event.stopPropagation();
+      // Close all other dropdowns
+      document.querySelectorAll('[id$="Menu"], [id$="DropdownMenu"]').forEach(m => {
+        if (m.id !== menuId) m.classList.add('hidden');
+      });
+      const menu = document.getElementById(menuId);
+      if (menu) menu.classList.toggle('hidden');
+    };
+
+    window.selectCustomOption = function(hiddenInputId, value, labelText, labelSpanId, menuId, callbackName) {
+      const input = document.getElementById(hiddenInputId);
+      const label = document.getElementById(labelSpanId);
+      const menu = document.getElementById(menuId);
+      if (input) input.value = value;
+      if (label) label.innerText = labelText;
+      if (menu) menu.classList.add('hidden');
+      if (callbackName && typeof window[callbackName] === 'function') {
+        window[callbackName](value);
+      }
+    };
+
+    window.closeAllCustomDropdowns = function(event) {
+      if (!event.target.closest('button')) {
+        document.querySelectorAll('[id$="Menu"], [id$="DropdownMenu"]').forEach(m => {
+          m.classList.add('hidden');
+        });
+      }
+    };
+
     // Initialize Firestore Data Sync & Auth State Listeners
     window.addEventListener('DOMContentLoaded', async () => {
       renderGenreChips();
@@ -1108,25 +1168,44 @@
       if (subName === 'drafts') renderDraftsList();
     };
 
-    // Populate Author's Novels in Studio Select Dropdowns
+    // Populate Author's Novels in Studio Custom Dropdowns
     window.populateAuthorNovelsSelects = function() {
       if (!window.currentUser) return;
       const myNovels = window.novelsData.filter(n => n.authorId === window.currentUser.uid || n.author === window.currentUser.name);
 
-      const addChapSelect = document.getElementById('addChapNovelId');
-      const editSelect = document.getElementById('editNovelSelectId');
+      const addChapMenu = document.getElementById('addChapNovelMenu');
+      const editMenu = document.getElementById('editNovelMenu');
 
-      const optionsHTML = myNovels.length > 0 
-        ? myNovels.map(n => `<option value="${n.id}">${n.title} (${n.chapters ? n.chapters.length : 0} Chapters)</option>`).join('')
-        : `<option value="">You haven't published any novels yet</option>`;
-
-      if (addChapSelect) addChapSelect.innerHTML = optionsHTML;
-      if (editSelect) {
-        editSelect.innerHTML = `<option value="">-- Select a novel to edit --</option>` + optionsHTML;
+      if (myNovels.length === 0) {
+        if (addChapMenu) addChapMenu.innerHTML = `<div class="px-4 py-2.5 text-xs text-gray-500">No novels published yet</div>`;
+        if (editMenu) editMenu.innerHTML = `<div class="px-4 py-2.5 text-xs text-gray-500">No novels published yet</div>`;
+        return;
       }
-      if (myNovels.length > 0 && editSelect && editSelect.value === "") {
-        editSelect.value = myNovels[0].id;
-        loadNovelDataForEditing(myNovels[0].id);
+
+      const itemsHTML = myNovels.map(n => `
+        <div onclick="selectCustomOption('addChapNovelId', '${n.id}', '${n.title.replace(/'/g, "\\'")}', 'addChapNovelLabel', 'addChapNovelMenu')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">
+          ${n.title} (${n.chapters ? n.chapters.length : 0} Chapters)
+        </div>
+      `).join('');
+
+      const editItemsHTML = myNovels.map(n => `
+        <div onclick="selectCustomOption('editNovelSelectId', '${n.id}', '${n.title.replace(/'/g, "\\'")}', 'editNovelSelectLabel', 'editNovelMenu', 'loadNovelDataForEditing')" class="px-4 py-2.5 text-xs text-gray-200 cursor-pointer custom-dropdown-item">
+          ${n.title} (${n.chapters ? n.chapters.length : 0} Chapters)
+        </div>
+      `).join('');
+
+      if (addChapMenu) addChapMenu.innerHTML = itemsHTML;
+      if (editMenu) editMenu.innerHTML = editItemsHTML;
+
+      // Set defaults if empty
+      const addInput = document.getElementById('addChapNovelId');
+      if (addInput && !addInput.value && myNovels.length > 0) {
+        selectCustomOption('addChapNovelId', myNovels[0].id, myNovels[0].title, 'addChapNovelLabel', 'addChapNovelMenu');
+      }
+
+      const editInput = document.getElementById('editNovelSelectId');
+      if (editInput && !editInput.value && myNovels.length > 0) {
+        selectCustomOption('editNovelSelectId', myNovels[0].id, myNovels[0].title, 'editNovelSelectLabel', 'editNovelMenu', 'loadNovelDataForEditing');
       }
     };
 
@@ -1137,8 +1216,13 @@
       if (!novel) return;
 
       document.getElementById('editPubTitle').value = novel.title || '';
-      document.getElementById('editPubGenre').value = novel.genre || 'Romance';
-      document.getElementById('editPubLanguage').value = novel.language || 'English';
+      
+      // Update Genre custom select
+      selectCustomOption('editPubGenre', novel.genre || 'Romance', novel.genre || 'Romance', 'editPubGenreLabel', 'editGenreMenu');
+      
+      // Update Language custom select
+      selectCustomOption('editPubLanguage', novel.language || 'English', novel.language || 'English', 'editPubLanguageLabel', 'editLangMenu');
+      
       document.getElementById('editPubDesc').value = novel.description || '';
       
       const previewImg = document.getElementById('editCoverPreview');
@@ -1342,8 +1426,8 @@
       if (!d) return;
 
       document.getElementById('pubTitle').value = d.title;
-      document.getElementById('pubGenre').value = d.genre;
-      document.getElementById('pubLanguage').value = d.language;
+      selectCustomOption('pubGenre', d.genre, d.genre, 'pubGenreLabel', 'pubGenreMenu');
+      selectCustomOption('pubLanguage', d.language, d.language, 'pubLanguageLabel', 'pubLanguageMenu');
       document.getElementById('pubDesc').value = d.description;
       document.getElementById('pubChapNum').value = d.chapNum;
       document.getElementById('pubChapTitle').value = d.chapTitle;
