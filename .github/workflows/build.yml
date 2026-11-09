@@ -20,17 +20,19 @@ jobs:
       - name: Install Gradle
         run: sudo apt-get update && sudo apt-get install -y gradle
 
-      - name: Create simple settings.gradle
+      - name: Create Plugin-Aware settings.gradle
         run: |
-          echo "include ':app'" > settings.gradle
-          echo "rootProject.name = 'inkfinity-app'" >> settings.gradle
-
-      - name: Inject Repositories into build.gradle
-        run: |
-          if [ -f app/build.gradle ]; then
-            # Prepend buildscript repositories so older gradle can find android plugins
-            sed -i '1i buildscript { repositories { google(); mavenCentral() } }' app/build.gradle
-          fi
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          rootProject.name = 'inkfinity-app'
+          include ':app'
+          EOF
 
       - name: Build Android App Bundle (AAB)
         run: gradle bundleRelease
