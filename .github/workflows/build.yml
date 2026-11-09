@@ -26,6 +26,10 @@ jobs:
           unzip -q gradle-8.5-bin.zip
           echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
 
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.keystore
+
       - name: Create Version-Aware settings.gradle
         run: |
           cat << 'EOF' > settings.gradle
@@ -50,10 +54,31 @@ jobs:
           include ':app'
           EOF
 
-      - name: Build Android App Bundle (AAB)
+      - name: Configure Signing in build.gradle
+        run: |
+          cat << 'EOF' >> app/build.gradle
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file('release.keystore')
+                      storePassword '${{ secrets.STORE_PASSWORD }}'
+                      keyAlias '${{ secrets.KEY_ALIAS }}'
+                      keyPassword '${{ secrets.KEY_PASSWORD }}'
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                  }
+              }
+          }
+          EOF
+
+      - name: Build Signed Android App Bundle
         run: gradle bundleRelease
 
-      - name: Upload AAB Artifact
+      - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
