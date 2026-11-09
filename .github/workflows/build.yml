@@ -20,6 +20,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
+      - name: Download and Install Gradle 8.5
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
+
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.keystore
@@ -33,8 +39,8 @@ jobs:
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      - name: Build Signed Android App Bundle with Gradle Wrapper
-        run: ./gradlew bundleRelease --stacktrace
+      - name: Build Signed Android App Bundle
+        run: gradle bundleRelease --stacktrace
 
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
