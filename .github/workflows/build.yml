@@ -23,7 +23,7 @@ jobs:
           unzip -q gradle-8.5-bin.zip
           echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
 
-      - name: Create Complete settings.gradle
+      - name: Create Version-Aware settings.gradle
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement {
@@ -32,6 +32,9 @@ jobs:
                   mavenCentral()
                   gradlePluginPortal()
               }
+          }
+          plugins {
+              id 'com.android.application' version '8.2.0' apply false
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
