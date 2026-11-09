@@ -30,41 +30,35 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/app/release.keystore
 
-      - name: Create Version-Aware settings.gradle
+      - name: Create keystore.properties
         run: |
-          cat << 'EOF' > settings.gradle
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          plugins {
-              id 'com.android.application' version '8.2.0' apply false
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = 'inkfinity-app'
-          include ':app'
+          cat << EOF > app/keystore.properties
+          storeFile=release.keystore
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      - name: Configure Signing in build.gradle
+      - name: Inject Signing Config into app/build.gradle
         run: |
           cat << 'EOF' >> app/build.gradle
 
           android {
               signingConfigs {
                   release {
-                      storeFile file('${{ github.workspace }}/app/release.keystore')
-                      storePassword '${{ secrets.STORE_PASSWORD }}'
-                      keyAlias '${{ secrets.KEY_ALIAS }}'
-                      keyPassword '${{ secrets.KEY_PASSWORD }}'
+                      if (project.hasProperty('keystore.properties') && file('keystore.properties').exists()) {
+                          Properties props = new Properties()
+                          props.load(new FileInputStream(file('keystore.properties')))
+                          storeFile file(props['storeFile'])
+                          storePassword props['storePassword']
+                          keyAlias props['keyAlias']
+                          keyPassword props['keyPassword']
+                      } else {
+                          storeFile file('release.keystore')
+                          storePassword '${{ secrets.STORE_PASSWORD }}'
+                          keyAlias '${{ secrets.KEY_ALIAS }}'
+                          keyPassword '${{ secrets.KEY_PASSWORD }}'
+                      }
                   }
               }
               buildTypes {
@@ -76,7 +70,7 @@ jobs:
           EOF
 
       - name: Build Signed Android App Bundle
-        run: gradle bundleRelease --info
+        run: gradle bundleRelease --stacktrace
 
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
