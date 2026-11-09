@@ -20,8 +20,32 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Generate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.5
+      - name: Download and Install Gradle 8.5
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
+
+      - name: Create Root settings.gradle
+        run: |
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "inkfinity-app"
+          include ':app'
+          EOF
 
       - name: Decode Keystore
         run: |
@@ -37,7 +61,7 @@ jobs:
           EOF
 
       - name: Build Signed Android App Bundle
-        run: ./gradlew bundleRelease --stacktrace
+        run: gradle bundleRelease --stacktrace
 
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
