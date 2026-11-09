@@ -76,7 +76,7 @@ jobs:
           EOF
 
       - name: Build Signed Android App Bundle
-        run: gradle bundleRelease --stacktrace
+        run: gradle bundleRelease --info
 
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
