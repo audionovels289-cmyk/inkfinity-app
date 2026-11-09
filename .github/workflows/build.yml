@@ -20,61 +20,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Download and Install Gradle 8.5
-        run: |
-          wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q gradle-8.5-bin.zip
-          echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
-
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/app/release.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.keystore
 
       - name: Create keystore.properties
         run: |
-          cat << EOF > ${{ github.workspace }}/app/keystore.properties
+          cat << EOF > app/keystore.properties
           storeFile=release.keystore
           storePassword=${{ secrets.STORE_PASSWORD }}
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      - name: Add Signing Config to app/build.gradle safely
-        run: |
-          python3 -c "
-          with open('app/build.gradle', 'r') as f:
-              content = f.read()
-
-          signing_block = '''
-          android {
-              signingConfigs {
-                  release {
-                      def propsFile = file('keystore.properties')
-                      if (propsFile.exists()) {
-                          def props = new Properties()
-                          props.load(new FileInputStream(propsFile))
-                          storeFile file(props['storeFile'])
-                          storePassword props['storePassword']
-                          keyAlias props['keyAlias']
-                          keyPassword props['keyPassword']
-                      }
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                  }
-              }
-          }
-          '''
-
-          if 'signingConfigs' not in content:
-              with open('app/build.gradle', 'a') as f:
-                  f.write(signing_block)
-          "
-
-      - name: Build Signed Android App Bundle
-        run: gradle bundleRelease --stacktrace
+      - name: Build Signed Android App Bundle with Gradle Wrapper
+        run: ./gradlew bundleRelease --stacktrace
 
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
