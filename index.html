@@ -704,7 +704,7 @@
           <div>
             <label class="block text-xs font-semibold text-gray-300 mb-1">Update Cover Image</label>
             <div class="flex items-center gap-4">
-              <label class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink-950 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
+              <label class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ink-950 border border-dashed border-ink-700 hover:border-ink-500 text-gray-300 hover:text-white cursor-pointer transition text-xs font-semibold">
                 <i class="fa-solid fa-image text-ink-400 text-base"></i>
                 <span id="editCoverFileName">Choose new cover image...</span>
                 <input type="file" id="editCoverFile" accept="image/*" onchange="handleEditCoverFileSelect(event)" class="hidden">
@@ -764,6 +764,51 @@
     </section>
 
   </main>
+
+  <!-- ================= FOOTER (ABOUT US & CONTACT US) ================= -->
+  <footer class="bg-ink-950/80 border-t border-ink-900/60 mt-auto py-10 px-4 sm:px-6 lg:px-8 text-gray-400 text-xs">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- About Us Column -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
+          <i class="fa-solid fa-feather-pointed text-ink-500"></i> About Inkfinity
+        </h3>
+        <p class="leading-relaxed text-gray-300">
+          Inkfinity is your ultimate destination for web novels and reading entertainment. Immerse yourself in a vast world of captivating stories, explore new independent authors, and read your favorite chapters anytime, anywhere.
+        </p>
+      </div>
+
+      <!-- Quick Navigation Column -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-white tracking-wider uppercase">Quick Links</h3>
+        <ul class="space-y-2">
+          <li><button onclick="showTab('home')" class="hover:text-white transition">Browse Stories</button></li>
+          <li><button onclick="showTab('library')" class="hover:text-white transition">My Saved Library</button></li>
+          <li><button onclick="showTab('publish')" class="hover:text-white transition">Writer Studio</button></li>
+        </ul>
+      </div>
+
+      <!-- Contact Us / Support Column -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
+          <i class="fa-solid fa-headset text-purple-400"></i> Contact Us & Support
+        </h3>
+        <p class="leading-relaxed text-gray-300">
+          Have questions, feedback, or facing any technical issues with the app? Our support team is here to help!
+        </p>
+        <p class="text-gray-200 font-semibold flex items-center gap-2 pt-1">
+          <i class="fa-solid fa-envelope text-ink-400"></i> support@inkfinity.co.in
+        </p>
+        <p class="text-[11px] text-gray-500">We typically respond within 24–48 hours.</p>
+      </div>
+
+    </div>
+    
+    <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-ink-900/80 text-center text-[11px] text-gray-500">
+      &copy; 2026 Inkfinity. All rights reserved. Built for web novel readers & creators worldwide.
+    </div>
+  </footer>
 
   <!-- ================= AUTH MODAL ================= -->
   <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
