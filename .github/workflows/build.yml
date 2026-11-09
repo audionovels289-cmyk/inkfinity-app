@@ -32,32 +32,31 @@ jobs:
 
       - name: Create keystore.properties
         run: |
-          cat << EOF > app/keystore.properties
+          cat << EOF > ${{ github.workspace }}/app/keystore.properties
           storeFile=release.keystore
           storePassword=${{ secrets.STORE_PASSWORD }}
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      - name: Inject Signing Config into app/build.gradle
+      - name: Add Signing Config to app/build.gradle safely
         run: |
-          cat << 'EOF' >> app/build.gradle
+          python3 -c "
+          with open('app/build.gradle', 'r') as f:
+              content = f.read()
 
+          signing_block = '''
           android {
               signingConfigs {
                   release {
-                      if (project.hasProperty('keystore.properties') && file('keystore.properties').exists()) {
-                          Properties props = new Properties()
-                          props.load(new FileInputStream(file('keystore.properties')))
+                      def propsFile = file('keystore.properties')
+                      if (propsFile.exists()) {
+                          def props = new Properties()
+                          props.load(new FileInputStream(propsFile))
                           storeFile file(props['storeFile'])
                           storePassword props['storePassword']
                           keyAlias props['keyAlias']
                           keyPassword props['keyPassword']
-                      } else {
-                          storeFile file('release.keystore')
-                          storePassword '${{ secrets.STORE_PASSWORD }}'
-                          keyAlias '${{ secrets.KEY_ALIAS }}'
-                          keyPassword '${{ secrets.KEY_PASSWORD }}'
                       }
                   }
               }
@@ -67,7 +66,12 @@ jobs:
                   }
               }
           }
-          EOF
+          '''
+
+          if 'signingConfigs' not in content:
+              with open('app/build.gradle', 'a') as f:
+                  f.write(signing_block)
+          "
 
       - name: Build Signed Android App Bundle
         run: gradle bundleRelease --stacktrace
