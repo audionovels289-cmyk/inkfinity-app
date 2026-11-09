@@ -20,26 +20,10 @@ jobs:
       - name: Install Gradle
         run: sudo apt-get update && sudo apt-get install -y gradle
 
-      - name: Create complete settings.gradle
+      - name: Create simple settings.gradle
         run: |
-          cat << 'EOF' > settings.gradle
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = 'inkfinity-app'
-          include ':app'
-          EOF
+          echo "include ':app'" > settings.gradle
+          echo "rootProject.name = 'inkfinity-app'" >> settings.gradle
 
       - name: Build Android App Bundle (AAB)
         run: gradle bundleRelease
