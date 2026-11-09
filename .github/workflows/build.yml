@@ -20,6 +20,13 @@ jobs:
       - name: Install Gradle
         run: sudo apt-get update && sudo apt-get install -y gradle
 
+      - name: Ensure settings.gradle exists
+        run: |
+          if [ ! -f settings.gradle ]; then
+            echo "include ':app'" > settings.gradle
+            echo "rootProject.name = 'inkfinity-app'" >> settings.gradle
+          fi
+
       - name: Build Android App Bundle (AAB)
         run: gradle bundleRelease
 
