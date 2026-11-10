@@ -108,6 +108,7 @@
           <button onclick="showTab('home')" id="nav-home" class="px-3.5 py-2 rounded-xl text-ink-500 bg-ink-500/10">Browse</button>
           <button onclick="showTab('library')" id="nav-library" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition">Bookmarks</button>
           <button onclick="showTab('publish')" id="nav-publish" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition">Writer Studio</button>
+          <button onclick="showTab('about')" id="nav-about" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-ink-900/40 transition">About Us</button>
         </nav>
       </div>
 
@@ -141,7 +142,7 @@
   </header>
 
   <!-- Mobile Bottom Nav -->
-  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0b0f19]/95 backdrop-blur-md border-t border-ink-900/60 px-6 py-2 flex items-center justify-between text-xs font-semibold">
+  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0b0f19]/95 backdrop-blur-md border-t border-ink-900/60 px-4 py-2 flex items-center justify-between text-xs font-semibold">
     <button onclick="showTab('home')" class="flex flex-col items-center gap-1 text-ink-500">
       <i class="fa-solid fa-compass text-base"></i>
       <span>Explore</span>
@@ -153,6 +154,10 @@
     <button onclick="showTab('publish')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
       <i class="fa-solid fa-pen-nib text-base"></i>
       <span>Studio</span>
+    </button>
+    <button onclick="showTab('about')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+      <i class="fa-solid fa-circle-info text-base"></i>
+      <span>About</span>
     </button>
     <button onclick="openCurrentProfile()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
       <i class="fa-solid fa-user text-base"></i>
@@ -763,52 +768,47 @@
       </div>
     </section>
 
+    <!-- 7. ABOUT US & CONTACT US TAB -->
+    <section id="tab-about" class="hidden space-y-8 max-w-3xl mx-auto">
+      <div class="border-b border-ink-900 pb-4">
+        <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+          <i class="fa-solid fa-circle-info text-ink-500"></i> About Us & Support
+        </h1>
+        <p class="text-xs text-gray-400 mt-1">Learn more about Inkfinity and get in touch with our team.</p>
+      </div>
+
+      <div class="space-y-6 bg-ink-950/40 p-6 sm:p-8 rounded-3xl border border-ink-900">
+        <!-- About Section -->
+        <div class="space-y-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-feather-pointed text-ink-500"></i> About Inkfinity
+          </h2>
+          <p class="leading-relaxed text-gray-300 text-sm">
+            Inkfinity is your ultimate destination for web novels and reading entertainment. Immerse yourself in a vast world of captivating stories, explore new independent authors, and read your favorite chapters anytime, anywhere.
+          </p>
+        </div>
+
+        <hr class="border-ink-900">
+
+        <!-- Contact Us Section -->
+        <div class="space-y-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-headset text-purple-400"></i> Contact Us & Support
+          </h2>
+          <p class="leading-relaxed text-gray-300 text-sm">
+            Have questions, feedback, or facing any technical issues with the app? Our support team is here to help!
+          </p>
+          <div class="p-4 rounded-2xl bg-ink-950 border border-ink-800 space-y-1 inline-block">
+            <p class="text-gray-200 font-bold text-sm flex items-center gap-2">
+              <i class="fa-solid fa-envelope text-ink-400"></i> Inkfinity.support@gmail.com
+            </p>
+            <p class="text-[11px] text-gray-400">We typically respond within 24–48 hours.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
-
-  <!-- ================= FOOTER (ABOUT US & CONTACT US) ================= -->
-  <footer class="bg-ink-950/80 border-t border-ink-900/60 mt-auto py-10 px-4 sm:px-6 lg:px-8 text-gray-400 text-xs">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-      
-      <!-- About Us Column -->
-      <div class="space-y-3">
-        <h3 class="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
-          <i class="fa-solid fa-feather-pointed text-ink-500"></i> About Inkfinity
-        </h3>
-        <p class="leading-relaxed text-gray-300">
-          Inkfinity is your ultimate destination for web novels and reading entertainment. Immerse yourself in a vast world of captivating stories, explore new independent authors, and read your favorite chapters anytime, anywhere.
-        </p>
-      </div>
-
-      <!-- Quick Navigation Column -->
-      <div class="space-y-3">
-        <h3 class="text-sm font-bold text-white tracking-wider uppercase">Quick Links</h3>
-        <ul class="space-y-2">
-          <li><button onclick="showTab('home')" class="hover:text-white transition">Browse Stories</button></li>
-          <li><button onclick="showTab('library')" class="hover:text-white transition">My Saved Library</button></li>
-          <li><button onclick="showTab('publish')" class="hover:text-white transition">Writer Studio</button></li>
-        </ul>
-      </div>
-
-      <!-- Contact Us / Support Column -->
-      <div class="space-y-3">
-        <h3 class="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
-          <i class="fa-solid fa-headset text-purple-400"></i> Contact Us & Support
-        </h3>
-        <p class="leading-relaxed text-gray-300">
-          Have questions, feedback, or facing any technical issues with the app? Our support team is here to help!
-        </p>
-        <p class="text-gray-200 font-semibold flex items-center gap-2 pt-1">
-          <i class="fa-solid fa-envelope text-ink-400"></i> Inkfinity.support@gmail.com
-        </p>
-        <p class="text-[11px] text-gray-500">We typically respond within 24–48 hours.</p>
-      </div>
-
-    </div>
-    
-    <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-ink-900/80 text-center text-[11px] text-gray-500">
-      &copy; 2026 Inkfinity. All rights reserved. Built for web novel readers & creators worldwide.
-    </div>
-  </footer>
 
   <!-- ================= AUTH MODAL ================= -->
   <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -1209,7 +1209,7 @@
 
     // Router Tabs Navigation
     window.showTab = function(tabName) {
-      const tabs = ['home', 'book-detail', 'reader', 'author', 'publish', 'library'];
+      const tabs = ['home', 'book-detail', 'reader', 'author', 'publish', 'library', 'about'];
       tabs.forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         if (el) el.classList.add('hidden');
